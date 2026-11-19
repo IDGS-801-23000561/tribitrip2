@@ -7,6 +7,8 @@ import { Oportunidad } from "./opportunity-model.js";
 import { Cotizacion, ServicioTuristico } from "./quote-models.js";
 import { tokenHash } from "./security.js";
 import { aCentavos, calcularImportes, maxCentavos } from "../shared/cotizaciones.js";
+import { estadoVigente, transicionesDisponibles } from "./quote-lifecycle.js";
+import { quoteDocument } from "./quote-document.js";
 
 const oid = () => new mongoose.Types.ObjectId();
 const servicioValido = {
@@ -43,10 +45,42 @@ test("cálculo en centavos y validación del modelo de cotizaciones", async () =
   for (const invalid of [
     { folio: "otro" }, { cliente: null }, { oportunidad: null }, { asesor: null },
     { vigencia: "2031-02-29" }, { conceptos: [] }, { conceptos: null },
+    { estado: "Otro" }, { estado: "Aceptada" }, { versionAceptada: 1 },
     { conceptos: [{ ...input.conceptos[0], cantidad: 1.5 }] },
     { conceptos: [{ ...input.conceptos[0], servicio: oid() }] },
   ]) {
     await assert.rejects(new Cotizacion({ ...input, ...invalid }).validate(), { name: "ValidationError" });
+  }
+});
+
+test("la vigencia incluye la fecha límite en la zona de Ciudad de México", () => {
+  const quote = { vigencia: "2032-02-29", estado: "Enviada" };
+  const late = new Date("2032-03-01T05:59:59Z");
+  const expired = new Date("2032-03-01T06:00:00Z");
+  assert.deepEqual(transicionesDisponibles(quote, late), ["Aceptada", "Rechazada"]);
+  assert.equal(estadoVigente(quote, expired), "Vencida");
+  assert.deepEqual(transicionesDisponibles(quote, expired), ["Vencida"]);
+  assert.deepEqual(transicionesDisponibles({ ...quote, estado: "Vencida" }, expired), []);
+  assert.equal(estadoVigente({ ...quote, estado: "Aceptada" }, expired), "Aceptada");
+});
+
+test("HTML imprimible contiene entre uno y cincuenta conceptos y los importes guardados", () => {
+  for (const count of [1, 50]) {
+    const page = quoteDocument("COT-PRUEBA", {
+      clienteDocumento: { nombre: "<Cliente>", correo: "prueba@example.test", telefono: "1234567890" },
+      version: 3, estado: "Aceptada", enviadaEn: "2032-02-01T12:00:00Z", vigencia: "2032-02-29",
+      condiciones: "Condición acordada", observaciones: "Detalle adicional",
+      subtotalCentavos: 5000, totalCentavos: 5400, impuestosCentavos: 300, cargosCentavos: 100,
+      conceptos: Array.from({ length: count }, () => ({
+        descripcion: "Concepto & servicio", cantidad: 2, precioUnitarioCentavos: 200, subtotalCentavos: 400,
+      })),
+    });
+    assert.equal((page.match(/Concepto &amp; servicio/g) || []).length, count);
+    for (const expected of [
+      "TribiTrip", "&lt;Cliente&gt;", "prueba@example.test", "1234567890", "COT-PRUEBA",
+      "Versión 3", "1 de febrero de 2032", "2032-02-29", "Aceptada", "Condición acordada",
+      "Detalle adicional", "54.00", "4.00", "@media print",
+    ]) assert.ok(page.includes(expected), expected);
   }
 });
 
@@ -57,7 +91,7 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
     admin: { _id: oid(), rol: "Administrador", activo: true },
   };
   const clientes = [
-    { _id: oid(), nombre: "Contacto uno", asesor: users.asesor._id },
+    { _id: oid(), nombre: "Contacto uno", correo: "contacto@example.test", telefono: "1234567890", asesor: users.asesor._id },
     { _id: oid(), nombre: "Contacto dos", asesor: users.ajeno._id },
   ];
   const oportunidades = clientes.map(({ _id, asesor }) => ({
@@ -81,7 +115,9 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
       usuario: Object.entries(users).find(([key]) => tokenHash(key) === token)?.[1],
     }),
   }));
-  t.mock.method(Cliente, "exists", async (filter) => find(clientes, filter));
+  t.mock.method(Cliente, "findOne", (filter) => ({
+    select: () => ({ lean: async () => find(clientes, filter) }),
+  }));
   t.mock.method(Oportunidad, "exists", async (filter) => find(oportunidades, filter));
   t.mock.method(Oportunidad, "findOne", (filter) => ({ select: async () => find(oportunidades, filter) }));
   t.mock.method(ServicioTuristico, "find", (filter) => ({
@@ -103,7 +139,7 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
     return {
       populate() { return this; },
       sort() { return this; },
-      select() { summary = true; return this; },
+      select(fields) { summary = fields.split(" ").includes("-conceptos"); return this; },
       lean: async () => Array.isArray(result) ? result.map(populate) : result && populate(result),
       then(resolve) {
         return Promise.resolve(result ? Cotizacion.hydrate(result.toObject?.() ?? result) : null).then(resolve);
@@ -121,7 +157,11 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
     assert.ok(Number.isInteger(filter.revision));
     const row = find(quotes, filter);
     if (!row) return { matchedCount: 0 };
+    if (update.$set?.estado === "Aceptada" && quotes.some((item) =>
+      !item._id.equals(row._id) && item.oportunidad.equals(row.oportunidad) && item.estado === "Aceptada"))
+      throw Object.assign(new Error("Duplicate key"), { code: 11000, keyPattern: { oportunidad: 1 } });
     Object.assign(row, update.$set);
+    if (update.$push?.historial) (row.historial ??= []).push(...update.$push.historial.$each);
     row.revision += update.$inc.revision;
     return { matchedCount: 1 };
   });
@@ -136,7 +176,10 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
     const res = await fetch("http://127.0.0.1:" + server.address().port + "/api" + path, {
       method, headers, body: data ? JSON.stringify(data) : undefined,
     });
-    return { status: res.status, body: await res.json() };
+    return {
+      status: res.status,
+      body: res.headers.get("content-type").includes("text/html") ? await res.text() : await res.json(),
+    };
   }
 
   const catalog = "/servicios-turisticos";
@@ -184,6 +227,8 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
   assert.equal(first.asesor, String(users.asesor._id));
   assert.equal(first.subtotalCentavos, 24850);
   assert.equal(first.totalCentavos, 24885);
+  assert.equal(first.version, 1);
+  assert.equal(first.estado, "Borrador");
   assert.equal(first.conceptos[0].subtotalCentavos, 24820);
   assert.equal(first.conceptos[0].referencia.precioReferenciaCentavos, 12345);
   const detail = path + "/" + first.id;
@@ -217,4 +262,58 @@ test("API consulta el catálogo y protege la creación, consulta y edición de c
   assert.equal(updated.conceptos.length, 1);
   assert.equal(updated.conceptos[0].referencia.precioReferenciaCentavos, 12345);
   assert.equal(updated.conceptos[0].descripcion, "Concepto revisado");
+  assert.equal(updated.version, 2);
+  assert.deepEqual(updated.versiones.map(({ version }) => version), [1]);
+  const firstVersion = detail + "/versiones/1";
+  assert.equal((await call(firstVersion, "ajeno")).status, 404);
+  assert.equal((await call(firstVersion + "/documento", "ajeno")).status, 404);
+  assert.equal((await call(firstVersion + "/documento")).status, 401);
+  assert.equal((await call(detail + "/versiones/0", "asesor")).status, 400);
+  assert.equal((await call(detail + "/versiones/3", "asesor")).status, 404);
+  const historical = (await call(firstVersion, "admin")).body;
+  assert.equal(historical.totalCentavos, 24885);
+  assert.equal(historical.conceptos[0].referencia.precioReferenciaCentavos, 12345);
+  const printable = (await call(firstVersion + "/documento", "admin")).body;
+  assert.ok(printable.includes("248.85"));
+  assert.ok(printable.includes("Paquete personalizado"));
+  assert.ok(printable.includes("contacto@example.test"));
+  assert.equal(printable.includes("Concepto revisado"), false);
+
+  const change = (url, estado, revision, session = "asesor") =>
+    call(url + "/estado", session, "PATCH", { estado, revision });
+  assert.equal((await change(detail, "Aceptada", 1, "ajeno")).status, 404);
+  assert.equal((await change(detail, "Otro", 1)).status, 400);
+  assert.equal((await change(detail, "Aceptada", 1)).status, 409);
+  assert.equal((await change(detail, "Enviada", 1)).body.estado, "Enviada");
+  const sent = await change(path + "/" + second.id, "Enviada", 0, "admin");
+  assert.equal(sent.status, 200);
+  const accepted = await change(detail, "Aceptada", 2);
+  assert.equal(accepted.body.estado, "Aceptada");
+  assert.equal(accepted.body.versionAceptada, 2);
+  assert.equal((await change(path + "/" + second.id, "Aceptada", 1, "admin")).status, 409);
+  assert.equal((await change(path + "/" + second.id, "Rechazada", 1, "admin")).body.estado, "Rechazada");
+  assert.equal((await change(detail, "Rechazada", 3)).status, 409);
+  assert.equal((await call(detail, "asesor", "PUT", { ...edit, revision: 3 })).status, 409);
+  const acceptedVersion = (await call(detail + "/versiones/2", "asesor")).body;
+  assert.equal(acceptedVersion.estado, "Aceptada");
+  assert.equal(acceptedVersion.versionAceptada, 2);
+  assert.ok(acceptedVersion.resueltaEn);
+  assert.equal((await call(related, "admin")).body.find(({ id }) => id === first.id).versionAceptada, 2);
+  const expired = (await call(path, "asesor", "POST", { ...input, vigencia: "2000-01-01" })).body;
+  assert.equal(expired.estado, "Vencida");
+  assert.equal((await change(path + "/" + expired.id, "Enviada", 0)).status, 409);
+  assert.equal((await change(path + "/" + expired.id, "Vencida", 0)).body.estado, "Vencida");
+
+  const legacy = quotes.find(({ _id }) => _id.equals(second.id));
+  for (const key of ["version", "estado", "historial", "clienteDocumento", "versionCreadaEn", "enviadaEn", "resueltaEn", "versionAceptada"])
+    delete legacy[key];
+  const old = (await call(path + "/" + second.id, "asesor")).body;
+  assert.equal(old.version, 1);
+  assert.equal(old.estado, "Borrador");
+  const legacyDocument = await call(path + "/" + second.id + "/versiones/1/documento", "admin");
+  assert.ok(legacyDocument.body.includes("contacto@example.test"));
+  const editedLegacy = await call(path + "/" + second.id, "asesor", "PUT", { ...fields, revision: 2 });
+  assert.equal(editedLegacy.status, 200);
+  assert.equal(editedLegacy.body.version, 2);
+  assert.equal((await call(path + "/" + second.id + "/versiones/1", "asesor")).body.totalCentavos, 24885);
 });

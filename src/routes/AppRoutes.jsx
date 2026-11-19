@@ -13,6 +13,7 @@ import Catalogo from "../pages/cotizaciones/Catalogo";
 import Cotizaciones from "../pages/cotizaciones/Cotizaciones";
 import NuevaCotizacion from "../pages/cotizaciones/NuevaCotizacion";
 import CotizacionDetalle from "../pages/cotizaciones/CotizacionDetalle";
+import CotizacionDocumento from "../pages/cotizaciones/CotizacionDocumento";
 import { useSession } from "../auth/session";
 function PrivateRoute() {
   const { usuario, cargando } = useSession();
@@ -48,6 +49,7 @@ export default function AppRoutes() {
           <Route path="cotizaciones/catalogo" element={<Catalogo />} />
           <Route path="cotizaciones/nueva" element={<NuevaCotizacion />} />
           <Route path="cotizaciones/:id" element={<CotizacionDetalle />} />
+          <Route path="cotizaciones/:id/versiones/:version/documento" element={<CotizacionDocumento />} />
           <Route path="reservas" element={
             <section className="panel">
               <h2>Reservas</h2>

@@ -43,9 +43,13 @@ En **Cotizaciones**, abre el **Catálogo de servicios** para buscar por nombre o
 
 Para cotizar, selecciona un cliente y una oportunidad accesible. Agrega líneas manuales o del catálogo, ajusta cantidades, descripciones y precios, y registra vigencia, condiciones y observaciones. También puedes abrir el listado de cotizaciones desde el detalle de una oportunidad. El formulario admite impuestos y cargos como importes fijos opcionales. Trabaja en MXN y usa hasta dos decimales. La API calcula y guarda los importes en centavos y asigna un folio basado en el ObjectId completo.
 
-La edición conserva el folio y los vínculos y usa una revisión para evitar sobrescribir cambios concurrentes. Una línea de catálogo conserva el nombre, la descripción de referencia, el destino, el proveedor y el precio de referencia capturados al agregarla, además de la descripción y el precio aplicado. Los cambios de estado, las versiones comerciales y el documento corresponden a HU-011 y HU-012.
+**Crear nueva versión** archiva la versión actual y abre otro borrador con el mismo folio y los mismos vínculos. La revisión evita sobrescribir cambios concurrentes. Cada línea de catálogo conserva el nombre, la descripción de referencia, el destino, el proveedor y el precio de referencia capturados al agregarla, además de la descripción y el precio aplicado.
 
-Para verificar en un entorno MongoDB aislado, consulta registros de catálogo autorizados, crea una cotización con dos conceptos, recarga el detalle y comprueba los totales, el folio y el acceso por dos asesores y un administrador. Comprueba que editar el catálogo en ese entorno conserva la referencia guardada y que dos ediciones de la misma revisión producen un conflicto.
+Una versión vigente pasa de **Borrador** a **Enviada**. Desde Enviada se puede registrar aceptación o rechazo mientras siga vigente. Al terminar la fecha en Ciudad de México, un borrador o una cotización enviada aparecen como **Vencida** y se puede registrar ese estado desde el detalle. Las versiones enviadas, rechazadas y vencidas pueden archivarse para abrir un nuevo borrador. La aceptación bloquea el folio y fija el número de versión aceptada. Solo puede haber una cotización aceptada por oportunidad.
+
+En el detalle, usa **Ver documento imprimible** o abre una versión anterior. **Imprimir o guardar como PDF** abre el diálogo del navegador. El documento usa los importes persistidos y los datos de cliente capturados para esa versión. Las cotizaciones anteriores al versionado se leen como versión 1 y, si todavía carecen de captura del cliente, el documento consulta su ficha actual. La primera escritura captura esos datos.
+
+Para verificar en un entorno MongoDB aislado, recorre el alta y el versionado, comprueba el acceso con dos asesores y un administrador y abre los documentos de ambas versiones. Valida la impresión en navegador con cotizaciones de una y muchas líneas, el rechazo tras expirar, el bloqueo tras aceptar y los conflictos de edición y aceptación simultáneas. Confirma que el índice único parcial esté creado y que cambiar el catálogo no afecte los importes históricos.
 
 ## Verificación
 npm.cmd run lint

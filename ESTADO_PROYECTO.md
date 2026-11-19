@@ -2,9 +2,9 @@
 
 ## 1. Resumen ejecutivo del estado actual
 
-TribiTrip es un CRM para una agencia de viajes. El repositorio contiene los flujos de autenticación por correo, administración de usuarios, gestión de clientes y prospectos, solicitudes de viaje, viajeros asociados, oportunidades comerciales, embudo de ventas, catálogo de servicios y cotizaciones. El frontend y la API están conectados en el código para estos flujos. Su operación con datos persistentes y en navegador queda **NO VERIFICADA** en esta auditoría.
+TribiTrip es un CRM para una agencia de viajes. El repositorio contiene los flujos de autenticación por correo, administración de usuarios, gestión de clientes y prospectos, solicitudes de viaje, viajeros asociados, oportunidades comerciales, embudo de ventas, catálogo de servicios, cotizaciones con historial y documentos imprimibles. El frontend y la API están conectados en el código para estos flujos. Su operación con datos persistentes y en navegador queda **NO VERIFICADA** en esta auditoría.
 
-El MVP usa exclusivamente MongoDB y comprende seis épicas (F01, F02, F03, F04, F06 y F07) y 17 historias. F05, HU-013 y HU-014 están fuera del alcance. La evaluación arroja **0 COMPLETADAS, 3 PARCIALES, 5 PENDIENTES y 9 NO VERIFICADAS**. Pasaron ESLint, el build de Vite y once pruebas de servidor sin conexión a MongoDB. Reservas conserva un marcador de navegación. El panel principal presenta tarjetas estáticas.
+El MVP usa exclusivamente MongoDB y comprende seis épicas (F01, F02, F03, F04, F06 y F07) y 17 historias. F05, HU-013 y HU-014 están fuera del alcance. La evaluación arroja **0 COMPLETADAS, 3 PARCIALES, 3 PENDIENTES y 11 NO VERIFICADAS**. Pasaron ESLint, el build de Vite y trece pruebas de servidor sin conexión a MongoDB. Reservas conserva un marcador de navegación. El panel principal presenta tarjetas estáticas.
 
 Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuente de criterios, [informacion tribitrip.txt](<informacion tribitrip.txt>) como contexto de requisitos, [cronograma tribitrip.txt](<cronograma tribitrip.txt>) como planificación y [DESARROLLO.md](DESARROLLO.md) como guía técnica. El código determina la implementación observada. Las referencias históricas a una base relacional y a actividades excluidas quedan subordinadas al alcance vigente. [README.md](README.md) conserva el contenido de plantilla de Vite.
 
@@ -48,6 +48,7 @@ Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuent
 | Embudo de ventas | Vista administrativa con grupos y conteos desde la API, filtros y enlaces al detalle. |
 | Catálogo | Consulta y búsqueda de servicios y paquetes por nombre o destino, detalle y selección para cotizar. |
 | Cotizaciones | Alta, detalle, listado general o por oportunidad y edición con folio, vigencia, términos, conceptos y totales calculados. |
+| Estados y documentos | Transiciones de cotización, aceptación vinculada a una versión, historial y documento imprimible por versión. |
 | Navegación | Layout privado y menú de módulos. La ruta de reservas muestra un aviso genérico. |
 
 Los únicos comportamientos comprobados por ejecución se enumeran en la sección 9.
@@ -68,8 +69,8 @@ Los únicos comportamientos comprobados por ejecución se enumeran en la secció
 | HU-008 | Visualizar embudo de ventas | NO VERIFICADA | Agrupación y conteos por etapa, filtros de responsable y estado, enlaces al detalle y acceso administrativo. | Verificación integrada de persistencia y experiencia de navegador. | `server/opportunity-routes.js`, `src/pages/oportunidades/Embudo.jsx` | Pasan pruebas HTTP simuladas de agrupación, filtros combinados, vacío y acceso por rol. | Recarga al entrar, cambiar filtros o pulsar Actualizar embudo. |
 | HU-009 | Consultar catálogo básico de servicios turísticos | NO VERIFICADA | Listado de servicios y paquetes, búsqueda literal por nombre o destino, filtro de destino, detalle y selección desde el cotizador o una nueva cotización. | Verificar lectura y selección con MongoDB y navegador. | `server/quote-models.js`, `server/quote-routes.js`, `src/pages/cotizaciones/Catalogo.jsx` | Pasan pruebas de modelo y HTTP con datos simulados de consulta, búsqueda y selección. | Catálogo de lectura. Requiere documentos registrados en el entorno. |
 | HU-010 | Generar cotizaciones personalizadas | NO VERIFICADA | Alta, consulta, listado por oportunidad, edición, folio único, vínculos, conceptos múltiples, condiciones, observaciones, vigencia y cálculo en centavos. | Verificar persistencia, índice único, concurrencia y uso en navegador. | `server/quote-models.js`, `server/quote-routes.js`, `shared/cotizaciones.js`, `src/pages/cotizaciones/` | Pasan pruebas de cálculo, modelo y HTTP con persistencia simulada, incluidos folios simultáneos, permisos y snapshots. | Impuestos y cargos opcionales de RF-06 como importes fijos. |
-| HU-011 | Administrar cotizaciones y sus estados | PENDIENTE | — | Consulta por oportunidad, estados borrador, enviada, aceptada, rechazada y vencida, versiones conservadas y cotización aceptada identificable. | — | Sin pruebas. | Depende de HU-010 y habilita HU-015. |
-| HU-012 | Generar documento de cotización | PENDIENTE | — | Documento imprimible o PDF con agencia, cliente, folio, servicios, cantidades, precios, total, vigencia y condiciones consistentes con lo persistido. | — | Sin pruebas. | Debe usar los datos de la versión que se consulta. |
+| HU-011 | Administrar cotizaciones y sus estados | NO VERIFICADA | Estados, transiciones con vigencia, historial numerado, consulta por versión y aceptación exclusiva por oportunidad. | Verificar índice, operaciones concurrentes y controles en navegador. | `server/quote-models.js`, `server/quote-lifecycle.js`, `server/quote-routes.js`, `src/pages/cotizaciones/CotizacionDetalle.jsx` | Pasan pruebas de transiciones, vigencia, permisos, persistencia simulada de versiones y conflicto. | Una cotización aceptada bloquea el folio y fija su versión. |
+| HU-012 | Generar documento de cotización | NO VERIFICADA | HTML imprimible de la versión elegida, con datos de agencia y cliente, conceptos, términos e importes persistidos. El navegador permite imprimir o guardar como PDF. | Verificar representación y paginación real en navegador con MongoDB. | `server/quote-document.js`, `server/quote-routes.js`, `src/pages/cotizaciones/CotizacionDocumento.jsx`, `src/pages/cotizaciones/documento.css` | Pasan pruebas del contenido de versiones y de la plantilla HTML con 1 y 50 conceptos. | La impresión y el PDF dependen del navegador. |
 | HU-015 | Registrar reservas de clientes | PENDIENTE | Ruta placeholder. | Reserva interna desde cotización aceptada, datos de cliente, servicios, fechas e importes, folio, consulta, cambios de estado e historial en ficha. | `src/routes/AppRoutes.jsx` (ruta) | Sin pruebas. | El registro es interno. |
 | HU-016 | Registrar pagos informativos | PENDIENTE | — | Fecha, monto, método, referencia, vínculo con reserva, historial, total registrado y saldo. | — | Sin pruebas. | Alcance informativo, sin cargos bancarios ni procesamiento electrónico. |
 | HU-017 | Consultar indicadores comerciales | PARCIAL | Conteos de contactos y prospectos sobre datos recibidos en Clientes. Estructura de tarjetas del dashboard. | Dashboard conectado a datos, conteos de contactos y oportunidades abiertas/ganadas/perdidas, conversión y ventas. | `src/pages/dashboard/Dashboard.jsx`, `src/pages/clientes/Clientes.jsx` | Sin pruebas de indicadores. | El criterio histórico de tareas pendientes/vencidas queda fuera por decisión de alcance. |
@@ -81,7 +82,7 @@ Los únicos comportamientos comprobados por ejecución se enumeran en la secció
 - **F01 · Autenticación y gestión de usuarios.** Login, perfil y logout están conectados con React. La administración de cuentas comparte sesión y aplica el rol en servidor. El código bloquea que el administrador se desactive o pierda su propio rol de forma intencional. Falta verificar el ciclo completo con cuentas activas e inactivas y la revocación.
 - **F02 · Clientes, prospectos y viajeros.** Clientes y prospectos comparten la colección de contactos, con estados Prospecto, Activo e Inactivo. Origen, contacto preferido y datos de interés se almacenan en el contacto. El listado y el formulario están conectados. Los viajeros se administran desde cada solicitud. La ficha comercial de clientes sigue pendiente. La consulta individual existente puede servir de base para la ficha.
 - **F03 · Solicitudes y oportunidades.** La solicitud ya cuenta con esquema, API, listado, detalle y edición. Las oportunidades se registran desde una solicitud existente y sus etapas alimentan el embudo administrativo. Las cuatro historias de F03 tienen implementación y requieren comprobación integrada.
-- **F04 · Cotizaciones.** El catálogo y cotizador tienen implementación de lectura, creación, consulta y edición. El listado por oportunidad ya está disponible. Queda por implementar el ciclo de estados, el historial de versiones comerciales y el documento.
+- **F04 · Cotizaciones.** El catálogo y cotizador tienen implementación de lectura, creación, consulta y edición. El listado por oportunidad ya está disponible. El ciclo de estados, el historial comercial y el documento imprimible por versión están implementados. Falta verificar la integración con MongoDB y navegador.
 - **F06 · Reservas y pagos informativos.** La navegación ofrece un acceso sin implementación funcional. Se requiere una reserva interna que conserve los datos comerciales aceptados y un historial de pagos informativos que permita calcular saldo.
 - **F07 · Panel, reportes y búsquedas.** El dashboard no invoca la API. Los conteos y filtros en Clientes son reutilizables como comportamiento de referencia. La vista contiene texto residual sobre actividades; no implica que ese módulo pertenezca al MVP. Los indicadores y reportes requieren datos comerciales que hoy no existen.
 
@@ -138,12 +139,23 @@ RF-05 define las etapas Solicitud recibida, Cotización, Seguimiento, Negociaci�
 | `GET /api/servicios-turisticos` | Lista registros. Admite búsqueda literal `q` por nombre o destino y filtro `destino`. |
 | `GET /api/servicios-turisticos/:id` | Detalle de servicio o paquete. |
 | `GET/POST /api/cotizaciones` | Lista dentro del ámbito o guarda una cotización. |
-| `GET/PUT /api/cotizaciones/:id` | Consulta detalle o edita datos comerciales con la revisión leída. |
+| `GET/PUT /api/cotizaciones/:id` | Consulta detalle e historial resumido o archiva la versión actual y crea un borrador con la revisión leída. |
+| `PATCH /api/cotizaciones/:id/estado` | Registra un cambio permitido de la versión actual con `estado` y `revision`. |
+| `GET /api/cotizaciones/:id/versiones/:version` | Devuelve los datos comerciales guardados de la versión solicitada. |
+| `GET /api/cotizaciones/:id/versiones/:version/documento` | Genera el HTML imprimible de la versión solicitada. |
 | `GET /api/oportunidades/:id/cotizaciones` | Lista cotizaciones de una oportunidad accesible. |
 
 Cada cotización conserva vigencia, condiciones, observaciones, timestamps y conceptos embebidos con descripción, cantidad, precio aplicado y subtotal. Las líneas de catálogo también guardan una copia del nombre, descripción, destino, proveedor y precio de referencia. Si un concepto se conserva durante la edición, su copia se mantiene aunque el catálogo cambie.
 
-Se intercambian precios como cadenas decimales de hasta dos posiciones. El frontend y el servidor comparten el cálculo en centavos enteros de MXN. El modelo calcula el subtotal de cada línea, la suma de líneas y el total con impuestos y cargos opcionales de RF-06. Valida cantidades enteras, importes no negativos, entre 1 y 50 conceptos y fecha de vigencia válida. El folio usa `COT-` y el ObjectId completo en mayúsculas, con índice único y sin contador compartido. La revisión de Mongoose detecta escrituras concurrentes. Es un control de concurrencia y no representa una versión comercial. El identificador estable y los datos comerciales guardados permiten introducir versiones y documentos en HU-011 y HU-012.
+Se intercambian precios como cadenas decimales de hasta dos posiciones. El frontend y el servidor comparten el cálculo en centavos enteros de MXN. El modelo calcula el subtotal de cada línea, la suma de líneas y el total con impuestos y cargos opcionales de RF-06. Valida cantidades enteras, importes no negativos, entre 1 y 50 conceptos y fecha de vigencia válida. El folio usa `COT-` y el ObjectId completo en mayúsculas, con índice único y sin contador compartido. La revisión de Mongoose detecta escrituras concurrentes. Es un control de concurrencia y no representa una versión comercial.
+
+### Estados, versiones y documento
+
+- Las cotizaciones comienzan en Borrador. Si están vigentes, Borrador pasa a Enviada y Enviada puede pasar a Aceptada o Rechazada. Pasada la vigencia inclusiva en Ciudad de México, Borrador y Enviada se leen como Vencida. El usuario puede registrar ese vencimiento. No se usa un proceso programado. Aceptada y Rechazada no se convierten en Vencida.
+- Un PUT conserva el folio, archiva la versión comercial previa con su estado al archivarse e incrementa su número. El borrador nuevo puede originarse en Borrador, Enviada, Rechazada o Vencida. El contenido y estado de un archivo histórico quedan fijos. Solo la versión actual puede cambiar de estado. La cotización aceptada es terminal y queda bloqueada para edición.
+- `historial[]` guarda los conceptos, referencias, precios, subtotales, total, condiciones, observaciones, vigencia, datos de cliente y fechas de cada versión anterior. La versión actual mantiene los campos de HU-010. Se archiva y reemplaza en una sola escritura con revisión optimista. Las cotizaciones previas se leen como versión 1 y, hasta su primera escritura, usan los datos actuales del cliente para el documento si carecen de una copia propia.
+- La aceptación guarda `versionAceptada` y `resueltaEn`. Un índice único parcial sobre la oportunidad para el estado Aceptada impide dos aceptaciones en la misma oportunidad. Una futura reserva puede identificar la cotización mediante su ID y `versionAceptada`, obtener sus conceptos e importes sin consultar el catálogo y obtener el contexto del viaje mediante la oportunidad y su solicitud.
+- `quote-document.js` genera HTML de una versión persistida. La fecha de emisión es la de envío o, si todavía no se envió, la de creación de la versión. El buscador de versiones y el documento aplican el mismo alcance que el detalle. La interfaz muestra una vista previa y abre el diálogo de impresión o guardado como PDF del navegador.
 
 ## 8. Autenticación, roles y seguridad
 
@@ -160,13 +172,13 @@ Entorno observado: Node.js 24.13.0 y dependencias presentes en raíz y servidor.
 | Verificación | Resultado y alcance |
 | --- | --- |
 | `npm.cmd run lint` | Pasó, código de salida 0 y sin hallazgos de ESLint. |
-| `npm.cmd --prefix server test` | Pasó, 11 pruebas aprobadas, 0 fallos, 0 omitidas. |
+| `npm.cmd --prefix server test` | Pasó, 13 pruebas aprobadas, 0 fallos, 0 omitidas. |
 | `server/app.test.js`, HTTP | Confirma 401 en listado sin sesión, 403 en login desde otro origen y 400 en login con cuerpo incompleto. |
 | `server/app.test.js`, modelos | Comprueba validación en memoria de correo, teléfono, presupuesto, asesor requerido y enum de rol. |
 | `server/security.test.js` | Comprueba sal variable, verificación correcta e incorrecta, rechazo de contraseña corta y transformación del token. |
 | `server/travel.test.js` | Dos pruebas de esquema y una prueba HTTP con sesión y operaciones de colección simuladas. Comprueba permisos, asociaciones, estados, cupo, conflicto de escritura y borrado protegido. |
 | `server/opportunity.test.js` | Pruebas de modelo y HTTP con persistencia simulada para vínculos, acceso, resultados de etapa, revisiones y filtros del embudo. |
-| `server/quote.test.js` | Tres pruebas de modelos, cálculo y HTTP con persistencia simulada. Cubren catálogo, folios simultáneos, totales, snapshots, relaciones, permisos, edición y conflicto de revisión. |
+| `server/quote.test.js` | Cinco pruebas de modelos, cálculo, vigencia, HTML y HTTP con persistencia simulada. Incluyen historial, documentos, bloqueo de cotizaciones aceptadas, rechazo, conflictos y compatibilidad previa. |
 | `npm.cmd run build` | Pasó. Generó los archivos ignorados de `dist/`. |
 | `dev` y `preview` de raíz | No ejecutados. Sirven la SPA y la salida de build, respectivamente. No se encontró script de pruebas de frontend ni suite de navegador. |
 | `dev`, `start`, `seed:admin` de servidor | No ejecutados. Cargan `.env`; los dos primeros inicializan MongoDB y el tercero escribe un usuario. |
@@ -176,6 +188,8 @@ Entorno observado: Node.js 24.13.0 y dependencias presentes en raíz y servidor.
 Para HU-007 y HU-008 falta verificar índices y consultas de Mongoose con MongoDB real, enlaces y filtros en navegador, persistencia de cierres, competencia entre dos escrituras y visibilidad tras modificar una oportunidad.
 
 Para HU-009 y HU-010 falta comprobar consulta a colecciones reales, índice de folio, selección desde el navegador, persistencia después de recargar, aislamiento por asesor y concurrencia de ediciones sobre MongoDB. El entorno de prueba requiere servicios registrados con datos autorizados.
+
+Para HU-011 y HU-012 falta validar el índice parcial y la revisión optimista sobre MongoDB real, revisar documentos históricos y aceptados desde el navegador y comprobar paginación, diálogo de impresión y guardado como PDF.
 
 ## 10. Errores, limitaciones y riesgos detectados
 
@@ -194,6 +208,7 @@ Para HU-009 y HU-010 falta comprobar consulta a colecciones reales, índice de f
 | Media | Las solicitudes y viajeros acumulados por cliente comparten el límite de 16 MiB por documento de MongoDB. El listado descompone las solicitudes sin paginación y el detalle carga las solicitudes del cliente antes de seleccionar una. Revisar volumen e índices antes de escalar. |
 | Media | El listado de oportunidades y las tarjetas del embudo no tienen paginación. La reasignación a otro propietario queda fuera del flujo actual para preservar el alcance de contactos y solicitudes. |
 | Media | Catálogo y cotizaciones carecen de paginación. El catálogo necesita registros provisionados en MongoDB. El tope general de 32 KB de la API también aplica al formulario de cotizaciones. |
+| Media | El historial de cotizaciones embebido comparte el límite BSON de 16 MiB con su documento. El PDF usa el diálogo de impresión del navegador. |
 | Baja | El cliente no distingue indisponibilidad de API durante la restauración de sesión; el HTML declara idioma inglés aunque la interfaz es española. La vista inicial y el mapa de títulos conservan referencias residuales de actividades. |
 
 Los riesgos de ejecución se infieren del código o configuración. No se reprodujeron con datos persistentes ni se evaluó el despliegue real.
@@ -203,6 +218,7 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 - **HU-004.** Completar ficha y datos comerciales, integrar el detalle existente y añadir la paginación prevista. Las relaciones dependen de los módulos comerciales.
 - **HU-017.** Conectar el dashboard a conteos, conversión y ventas persistidas, con la visibilidad que corresponda al usuario.
 - **HU-019.** Extender búsqueda y filtros más allá de los contactos y verificar visibilidad en servidor.
+- **HU-011 y HU-012.** Implementadas. Pendiente la comprobación integrada con MongoDB y navegador.
 - **HU-009 y HU-010.** Implementadas. Pendiente la comprobación integrada con MongoDB y navegador.
 - **HU-007 y HU-008.** Disponibles en código. Pendiente la verificación integrada con MongoDB y navegador.
 - **HU-005 y HU-006.** La implementación está disponible. Falta validar la integración de navegador, API y MongoDB en el entorno aislado descrito en la sección 9.
@@ -212,7 +228,6 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 
 | Épica | Entregables funcionales pendientes |
 | --- | --- |
-| F04 | Estados y versiones comerciales (HU-011) y documento (HU-012). |
 | F06 | Reservas y pagos informativos (HU-015, HU-016). |
 | F07 | Reportes de destinos y ventas (HU-018). |
 
@@ -228,7 +243,7 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 
 1. Verificar F01, el alta de contactos y HU-005/HU-006 con datos aislados cuando se autorice el entorno. Confirmar el ciclo de persistencia, el aislamiento y el borrado protegido.
 2. Verificar HU-007 y HU-008 con datos aislados. Las solicitudes y oportunidades disponibles pueden alimentar la ficha comercial de HU-004.
-3. Verificar HU-009 y HU-010 con MongoDB y navegador. Continuar, cuando se autorice, con HU-011 para conservar versiones y cambios de estado y con HU-012 para generar el documento desde los importes guardados.
+3. Verificar F04 con MongoDB y navegador, en especial la identificación de la versión aceptada y el índice único por oportunidad.
 4. Implementar HU-015 desde la cotización aceptada y luego HU-016. Incorporar las reservas a la ficha comercial.
 5. Agregar filtros y búsquedas de HU-019 al madurar las entidades correspondientes. Completar HU-017 y HU-018 con datos reales una vez disponibles las fuentes de oportunidades, solicitudes y ventas.
 
@@ -238,4 +253,4 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 - Reutilizar `api.js`, `SessionProvider`, guardas de rutas, `MainLayout`, `Sidebar`, `ConfirmDialog`, formularios y estilos existentes. Conservar los flujos de login, usuarios y contactos, y usar los modelos, el middleware de autorización y el manejo de errores actuales como puntos de integración.
 - Mantener la autorización en servidor y validar el aislamiento entre asesores en las nuevas operaciones. Preservar el contrato con la SPA y el despliegue de mismo origen. Evaluar compatibilidad con documentos previos antes de endurecer esquemas o añadir relaciones.
 - DESARROLLO menciona contactos históricos en localStorage. El código actual de Clientes obtiene los registros de la API y en `src/` no se encontraron lecturas de localStorage ni importación. Cualquier dato legado y su titularidad quedan sin verificar.
-- Para continuar, verificar primero los flujos base cuando se autorice un entorno MongoDB aislado. Las siguientes historias nuevas son HU-011 y HU-012. Al desarrollarlas con autorización, reutilizar el folio y las copias de los conceptos. Mantener separadas la revisión de concurrencia y la futura versión comercial. Esta etapa se limita a HU-009 y HU-010.
+- Para continuar, verificar primero los flujos base cuando se autorice un entorno MongoDB aislado. Las siguientes historias nuevas son HU-015 y HU-016. Cuando se autoricen, usar la cotización y su `versionAceptada` como referencia a los datos comerciales acordados. Mantener separadas revisión de concurrencia y versión comercial. Esta etapa se limita a HU-011 y HU-012.

@@ -23,12 +23,13 @@ export default function Cotizaciones() {
       {data?.length > 0 && (
         <div className="tabla-contenedor">
           <table className="tabla-clientes">
-            <thead><tr><th>Folio</th><th>Cliente</th><th>Oportunidad</th><th>Vigencia</th><th>Total</th></tr></thead>
+            <thead><tr><th>Folio</th><th>Cliente</th><th>Oportunidad</th><th>Versión</th><th>Estado</th><th>Vigencia</th><th>Total</th></tr></thead>
             <tbody>
               {data.map((item) => (
                 <tr key={item.id}>
                   <td><Link to={item.id}>{item.folio}</Link></td>
                   <td>{item.cliente?.nombre}</td><td>{item.oportunidad?.titulo}</td>
+                  <td>{item.version}</td><td>{item.estado}</td>
                   <td>{item.vigencia}</td><td>{mostrarImporte(item.totalCentavos)}</td>
                 </tr>
               ))}
