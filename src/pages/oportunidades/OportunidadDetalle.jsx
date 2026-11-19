@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { etapas } from "../../../shared/oportunidades.js";
 import { api } from "../../services/api";
-import { useOportunidadesApi } from "./useOportunidadesApi";
+import { useApiData } from "../../services/useApiData";
 
 function Detalle({ id }) {
   const path = "/oportunidades/" + id;
-  const { data, error: loadError } = useOportunidadesApi(path);
+  const { data, error: loadError } = useApiData(path);
   const [updated, setUpdated] = useState(null);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -49,6 +49,7 @@ function Detalle({ id }) {
               <><dt>Fecha de cierre</dt><dd>{new Date(oportunidad.cerradaEn).toLocaleString("es-MX")}</dd></>
             )}
           </dl>
+          <Link to={"/cotizaciones?oportunidad=" + id}>Consultar cotizaciones</Link>
           {editing ? (
             <form className="account-form" onSubmit={submit}>
               <label>Título<input name="titulo" required maxLength={120} defaultValue={oportunidad.titulo} /></label>

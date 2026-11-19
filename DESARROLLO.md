@@ -37,6 +37,16 @@ En **Embudo de ventas**, disponible para administradores, filtra por responsable
 
 Para verificar la integración con MongoDB en un entorno autorizado, comprueba el vínculo con la solicitud tras recargar, las restricciones con dos asesores y un administrador, el conflicto con dos pestañas editando la misma revisión y el movimiento de las tarjetas y sus conteos al cambiar de etapa.
 
+## Catálogo y cotizaciones
+
+En **Cotizaciones**, abre el **Catálogo de servicios** para buscar por nombre o destino, filtrar por destino y seleccionar un servicio. El catálogo consulta documentos de MongoDB mediante los endpoints de lectura. Para ver resultados, el entorno autorizado debe contar con registros válidos en la colección del modelo `ServicioTuristico`. Cada registro necesita nombre, descripción y precio en centavos. El tipo puede ser Servicio o Paquete y el destino, la categoría y el proveedor son opcionales.
+
+Para cotizar, selecciona un cliente y una oportunidad accesible. Agrega líneas manuales o del catálogo, ajusta cantidades, descripciones y precios, y registra vigencia, condiciones y observaciones. También puedes abrir el listado de cotizaciones desde el detalle de una oportunidad. El formulario admite impuestos y cargos como importes fijos opcionales. Trabaja en MXN y usa hasta dos decimales. La API calcula y guarda los importes en centavos y asigna un folio basado en el ObjectId completo.
+
+La edición conserva el folio y los vínculos y usa una revisión para evitar sobrescribir cambios concurrentes. Una línea de catálogo conserva el nombre, la descripción de referencia, el destino, el proveedor y el precio de referencia capturados al agregarla, además de la descripción y el precio aplicado. Los cambios de estado, las versiones comerciales y el documento corresponden a HU-011 y HU-012.
+
+Para verificar en un entorno MongoDB aislado, consulta registros de catálogo autorizados, crea una cotización con dos conceptos, recarga el detalle y comprueba los totales, el folio y el acceso por dos asesores y un administrador. Comprueba que editar el catálogo en ese entorno conserva la referencia guardada y que dos ediciones de la misma revisión producen un conflicto.
+
 ## Verificación
 npm.cmd run lint
 npm.cmd run build

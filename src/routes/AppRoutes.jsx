@@ -9,6 +9,10 @@ import SolicitudDetalle from "../pages/solicitudes/SolicitudDetalle";
 import Oportunidades from "../pages/oportunidades/Oportunidades";
 import OportunidadDetalle from "../pages/oportunidades/OportunidadDetalle";
 import Embudo from "../pages/oportunidades/Embudo";
+import Catalogo from "../pages/cotizaciones/Catalogo";
+import Cotizaciones from "../pages/cotizaciones/Cotizaciones";
+import NuevaCotizacion from "../pages/cotizaciones/NuevaCotizacion";
+import CotizacionDetalle from "../pages/cotizaciones/CotizacionDetalle";
 import { useSession } from "../auth/session";
 function PrivateRoute() {
   const { usuario, cargando } = useSession();
@@ -40,20 +44,16 @@ export default function AppRoutes() {
           <Route path="solicitudes/:id" element={<SolicitudDetalle />} />
           <Route path="oportunidades" element={<Oportunidades />} />
           <Route path="oportunidades/:id" element={<OportunidadDetalle />} />
-          {["cotizaciones", "reservas"].map(
-            (path) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <section className="panel">
-                    <h2>{path}</h2>
-                    <p>Este módulo se encuentra en desarrollo.</p>
-                  </section>
-                }
-              />
-            ),
-          )}
+          <Route path="cotizaciones" element={<Cotizaciones />} />
+          <Route path="cotizaciones/catalogo" element={<Catalogo />} />
+          <Route path="cotizaciones/nueva" element={<NuevaCotizacion />} />
+          <Route path="cotizaciones/:id" element={<CotizacionDetalle />} />
+          <Route path="reservas" element={
+            <section className="panel">
+              <h2>Reservas</h2>
+              <p>Este módulo se encuentra en desarrollo.</p>
+            </section>
+          } />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

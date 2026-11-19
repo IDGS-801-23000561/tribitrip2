@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import { Usuario, Sesion, Cliente } from "./models.js";
 import { registerTravelRoutes } from "./travel-routes.js";
 import { registerOpportunityRoutes } from "./opportunity-routes.js";
+import { registerQuoteRoutes } from "./quote-routes.js";
 import {
   hashPassword,
   verifyPassword,
@@ -217,6 +218,7 @@ app.delete("/api/clientes/:id", validId, async (req, res) => {
 });
 registerTravelRoutes(app, { scope, fail, validId });
 registerOpportunityRoutes(app, { scope, fail, validId, admin });
+registerQuoteRoutes(app, { scope, fail, validId });
 app.use("/api", (req, res) =>
   res.status(404).json({ mensaje: "Ruta no encontrada." }),
 );

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { estados } from "../../../shared/oportunidades.js";
-import { useOportunidadesApi } from "./useOportunidadesApi";
+import { useApiData } from "../../services/useApiData";
 import "./embudo.css";
 
 function Etapas({ query }) {
-  const { data: grupos, error } = useOportunidadesApi("/oportunidades/embudo?" + query);
+  const { data: grupos, error } = useApiData("/oportunidades/embudo?" + query);
   if (error) return <p role="alert">{error}</p>;
   if (!grupos) return <p role="status">Cargando embudo…</p>;
   return (
@@ -35,7 +35,7 @@ function Etapas({ query }) {
 export default function Embudo() {
   const [params, setParams] = useSearchParams();
   const [refresh, setRefresh] = useState(0);
-  const { data: usuarios, error } = useOportunidadesApi("/usuarios");
+  const { data: usuarios, error } = useApiData("/usuarios");
   function filter(key, value) {
     const query = new URLSearchParams(params);
     if (value) query.set(key, value);

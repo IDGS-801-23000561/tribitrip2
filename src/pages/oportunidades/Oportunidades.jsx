@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api } from "../../services/api";
-import { useOportunidadesApi } from "./useOportunidadesApi";
+import { useApiData } from "../../services/useApiData";
 
 function NuevaOportunidad({ onCancel }) {
   const navigate = useNavigate();
-  const { data: solicitudes, error: loadError } = useOportunidadesApi("/solicitudes");
+  const { data: solicitudes, error: loadError } = useApiData("/solicitudes");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -70,7 +70,7 @@ function NuevaOportunidad({ onCancel }) {
 
 export default function Oportunidades() {
   const [creando, setCreando] = useState(false);
-  const { data: oportunidades, error } = useOportunidadesApi("/oportunidades");
+  const { data: oportunidades, error } = useApiData("/oportunidades");
   return (
     <section className="panel">
       <h2>Oportunidades registradas</h2>

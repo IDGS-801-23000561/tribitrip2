@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { api } from "../../services/api";
+import { api } from "./api";
 
-export function useOportunidadesApi(path) {
+export function useApiData(path) {
   const [result, setResult] = useState(null);
   useEffect(() => {
+    if (!path) return;
     let active = true;
     api(path)
       .then((data) => { if (active) setResult({ path, data }); })

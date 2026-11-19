@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dns from "node:dns";
 import { Oportunidad } from "./opportunity-model.js";
+import { Cotizacion, ServicioTuristico } from "./quote-models.js";
 import { travelRequestSchema } from "./travel-models.js";
 
 const { Schema } = mongoose;
@@ -68,5 +69,8 @@ export async function connect() {
   await mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
   });
-  await Promise.all([Usuario.init(), Sesion.init(), Cliente.init(), Oportunidad.init()]);
+  await Promise.all([
+    Usuario.init(), Sesion.init(), Cliente.init(), Oportunidad.init(),
+    ServicioTuristico.init(), Cotizacion.init(),
+  ]);
 }
