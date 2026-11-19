@@ -1,4 +1,3 @@
-
 import { Outlet, useLocation } from "react-router";
 import { useState } from "react";
 import { useSession } from "../auth/session";
@@ -27,9 +26,7 @@ function MainLayout() {
       <div className="main-container">
         <header className="main-header">
           <div>
-            <span className="header-subtitulo">
-              TribiTrip / CRM
-            </span>
+            <span className="header-subtitulo">TribiTrip / CRM</span>
             <h1>{titulo}</h1>
           </div>
 
@@ -40,7 +37,18 @@ function MainLayout() {
               <small>{usuario.rol}</small>
             </div>
           </div>
-        <button className="btn-secondary" onClick={async () => { try { await logout(); } catch (e) { setError(e.message); } }}>Cerrar sesion</button>
+          <button
+            className="btn-secondary"
+            onClick={async () => {
+              try {
+                await logout();
+              } catch (e) {
+                setError(e.message);
+              }
+            }}
+          >
+            Cerrar sesion
+          </button>
         </header>
 
         <main className="main-content">

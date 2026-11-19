@@ -1,4 +1,3 @@
-
 import { useSession } from "../auth/session";
 import { NavLink } from "react-router";
 import {
@@ -8,7 +7,6 @@ import {
   TrendingUp,
   FileText,
   CalendarCheck,
-
 } from "lucide-react";
 
 const secciones = [
@@ -42,7 +40,6 @@ const secciones = [
     nombre: "Reservas",
     icono: CalendarCheck,
   },
-
 ];
 
 function Sidebar() {
@@ -58,24 +55,22 @@ function Sidebar() {
         </div>
       </div>
 
-      <p className="sidebar-titulo">
-        MENÚ PRINCIPAL
-      </p>
+      <p className="sidebar-titulo">MENÚ PRINCIPAL</p>
 
-      <nav
-        className="sidebar-nav"
-        aria-label="Menú principal"
-      >
-        {[...secciones, ...(usuario.rol === "Administrador" ? [{ ruta: "/usuarios", nombre: "Usuarios", icono: Users }] : [])].map((seccion) => {
+      <nav className="sidebar-nav" aria-label="Menú principal">
+        {[
+          ...secciones,
+          ...(usuario.rol === "Administrador"
+            ? [{ ruta: "/usuarios", nombre: "Usuarios", icono: Users }]
+            : []),
+        ].map((seccion) => {
           const Icono = seccion.icono;
 
           return (
             <NavLink
               key={seccion.ruta}
               to={seccion.ruta}
-              className={({ isActive }) =>
-                isActive ? "activo" : ""
-              }
+              className={({ isActive }) => (isActive ? "activo" : "")}
             >
               <Icono size={19} aria-hidden="true" />
               <span>{seccion.nombre}</span>

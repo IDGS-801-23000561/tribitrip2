@@ -1,0 +1,443 @@
+react
+mongo
+vite
+-----Informacion del proyecto-----
+Limitaciones
+Limitaciones del alcance
+El proyecto contempla una solución integral ERP con punto de venta y CRM para una agencia de viajes. Sin embargo, durante el presente cuatrimestre se desarrollará exclusivamente el módulo CRM y los componentes necesarios para su funcionamiento.
+El ERP, el punto de venta y las integraciones completas se consideran para etapas posteriores.
+
+Limitaciones funcionales
+LIM-01. Reservaciones en tiempo real
+El CRM no se conectará directamente con sistemas globales de distribución (GDS), como Amadeus, Sabre o Travelport.
+No realizará reservaciones automáticas de vuelos, hoteles o tours. Los localizadores externos podrán registrarse manualmente.
+
+LIM-02. Emisión de boletos
+No se implementarán funcionalidades de emisión, reemisión o cancelación directa de boletos aéreos.
+
+LIM-03. Procesamiento bancario
+El CRM no procesará pagos con tarjetas ni realizará transacciones bancarias.
+Únicamente permitirá registrar pagos informativos asociados a reservas, sin almacenar números completos de tarjetas, códigos de seguridad o credenciales bancarias.
+
+LIM-04. Facturación electrónica
+No se implementará la generación de CFDI ni la integración con el SAT o proveedores externos de facturación.
+
+LIM-05. Integración automática con correo y mensajería
+No se desarrollarán integraciones automáticas con Gmail, Outlook, WhatsApp Business o SMS durante la primera versión.
+Las comunicaciones con clientes se registrarán manualmente.
+
+LIM-06. Motor de precios dinámicos
+El sistema no calculará automáticamente tarifas de aerolíneas, hoteles o servicios turísticos.
+Los precios serán registrados por los asesores a partir de fuentes externas.
+
+LIM-07. Portal de autoservicio
+La primera versión del CRM será de uso interno para administradores y asesores de viajes.
+Los clientes no contarán con un portal para consultar o modificar directamente sus viajes.
+
+LIM-08. Aplicaciones móviles
+No se desarrollarán aplicaciones nativas para Android o iOS.
+Se implementará una aplicación web con diseño responsivo.
+
+LIM-09. Marketing avanzado
+No se implementarán campañas masivas automatizadas, puntuación predictiva de prospectos, inteligencia artificial ni automatización omnicanal.
+
+LIM-10. Contabilidad completa
+El CRM no sustituirá un sistema contable.
+No administrará pólizas, conciliaciones bancarias, nómina ni estados financieros.
+
+LIM-11. Gestión documental sensible
+Se evitará almacenar documentos personales completos, como pasaportes o visas, salvo que exista una justificación y controles adicionales de seguridad.
+
+LIM-12. Disponibilidad empresarial
+Al tratarse de un proyecto académico y de desarrollo inicial, no se garantizará alta disponibilidad 24/7, replicación multirregión ni acuerdos empresariales de nivel de servicio.
+
+LIM-13. Integración con ERP y punto de venta
+No se desarrollarán los módulos administrativos del ERP ni el punto de venta durante esta etapa.
+Tampoco se implementará la migración, sincronización o integración operativa con el punto de venta actual.
+Únicamente se considerarán sus necesidades futuras durante el diseño de arquitectura y datos.
+
+Restricciones técnicas y operativas
+El desarrollo se limitará al alcance aprobado para el módulo CRM.
+
+La solución utilizará tecnologías web compatibles con navegadores modernos.
+
+La información deberá almacenarse en una base de datos relacional.
+
+Se deberán aplicar controles de autenticación, autorización y protección de datos.
+
+El desarrollo dependerá de la disponibilidad de los integrantes del equipo y de los usuarios clave.
+
+El presupuesto, los ambientes y el plazo estarán sujetos a las condiciones y aprobaciones del proyecto.
+
+Cualquier modificación al alcance deberá documentarse, evaluarse y priorizarse dentro del Product Backlog.
+
+Consideraciones para futuras versiones
+Las funcionalidades excluidas no se descartan definitivamente. Podrán incorporarse en futuras etapas, dependiendo de la evolución del proyecto, los recursos disponibles, la viabilidad técnica y la aprobación de cambios de alcance.
+
+---------------------
+Problemática - Justificación
+
+Las agencias de viajes necesitan ofrecer a sus clientes un acceso sencillo a sus paquetes turísticos y mantener una gestión organizada de la información comercial. Sin embargo, cuando los procesos de venta, las solicitudes de información y los datos de los clientes se manejan de manera independiente, pueden surgir problemas como la duplicidad de información, la falta de seguimiento y las dificultades para consultar el historial de compras y las preferencias de cada cliente.
+
+Además, la ausencia de un canal de venta digital integrado con la gestión de clientes puede generar una mayor dependencia de la atención directa de los empleados, dificultando la consulta y adquisición de paquetes turísticos. Ante esta problemática, se justifica el desarrollo de una plataforma web que integre funcionalidades de comercio electrónico y un sistema CRM, con el propósito de facilitar la comercialización de paquetes turísticos y centralizar la información de los clientes.
+
+Con este proyecto se busca mejorar la experiencia de compra, optimizar el seguimiento de clientes y prospectos, facilitar el trabajo de los empleados y aprovechar la información recopilada para ofrecer una atención personalizada y desarrollar estrategias de fidelización.
+
+---------------------
+
+Alcance
+
+El proyecto contempla el desarrollo de una plataforma web de gestión CRM para una agencia de viajes, diseñada para centralizar la información de clientes y prospectos, administrar un catálogo de paquetes turísticos, generar cotizaciones personalizadas y dar seguimiento al proceso comercial, desde la captación del cliente potencial hasta la confirmación de la venta y el seguimiento posventa.
+El sistema permitirá gestionar oportunidades de venta, registrar interacciones con los clientes, administrar cotizaciones y reservas, así como consultar indicadores comerciales para apoyar la toma de decisiones.
+Se contemplan las siguientes funcionalidades:
+
+Gestión de clientes y prospectos: registro de datos personales, preferencias de viaje, historial de interacciones y seguimiento comercial.
+
+Catálogo de viajes: consulta de paquetes turísticos, destinos, fechas, horarios, transportes, servicios y precios.
+
+Cotizaciones personalizadas: elaboración de propuestas económicas según las necesidades, preferencias y presupuesto del cliente.
+
+Gestión de oportunidades: seguimiento de prospectos mediante un embudo de ventas, registro de actividades y control de cotizaciones.
+
+Registro de ventas y reservas: administración interna de las ventas confirmadas, servicios contratados y pagos informativos.
+
+Reportes comerciales: análisis de ventas, destinos más solicitados, paquetes más vendidos, tasas de conversión y desempeño comercial.
+
+Seguridad y administración: autenticación, gestión de usuarios y control de acceso mediante roles.
+
+Alcance de la primera etapa: durante el presente cuatrimestre se desarrollará principalmente el módulo CRM y los componentes necesarios para su funcionamiento. El desarrollo completo del ERP y su integración se contemplan para etapas posteriores.
+
+Funcionalidades futuras: se considera incorporar promociones y descuentos personalizados, beneficios para clientes registrados, programas de referidos y herramientas de fidelización para incrementar la conversión y retención de clientes.
+Limitaciones: el proyecto no contempla inicialmente comercio electrónico, procesamiento de pagos bancarios, emisión de boletos, reservaciones automáticas con proveedores externos ni contabilidad completa. Las ventas serán gestionadas por los asesores de la agencia.
+
+El objetivo es establecer una solución centralizada, escalable y orientada a mejorar la eficiencia operativa, la atención al cliente y los resultados comerciales de la agencia.
+
+-----------------------
+Propuesta de solución - Tecnologías
+
+Propuesta de solución
+Descripción general
+Se propone desarrollar una aplicación web de gestión de relaciones con clientes (CRM) para una agencia de viajes, con el objetivo de centralizar la información de clientes y prospectos, mejorar el seguimiento de solicitudes de viaje y organizar los procesos comerciales de la agencia.
+La solución permitirá administrar la información desde el primer contacto con un cliente hasta el cierre de una venta o reserva, conservando un historial de las actividades, cotizaciones e interacciones realizadas.
+El CRM formará parte de una propuesta integral de sistema ERP con punto de venta. Sin embargo, durante el presente cuatrimestre se desarrollará únicamente el módulo CRM, considerando una arquitectura que facilite su integración con los demás componentes en futuras etapas.
+
+Objetivo de la solución
+Desarrollar un sistema CRM web, funcional, seguro y mantenible que permita mejorar la administración de clientes, prospectos, oportunidades de venta, cotizaciones y reservas de una agencia de viajes.
+La solución busca reducir la dispersión de información, evitar la pérdida de solicitudes, mejorar el seguimiento comercial y facilitar la consulta de información para la toma de decisiones.
+
+Funcionamiento propuesto
+El sistema estará orientado al uso interno de la agencia de viajes y contará con dos tipos de usuarios: Administrador y Asesor de viajes.
+El proceso comercial seguirá el siguiente flujo:
+Registro del cliente o prospecto → Solicitud de viaje → Oportunidad comercial → Cotización → Seguimiento → Cierre de oportunidad → Registro de reserva → Historial del cliente.
+
+Registro del cliente: el asesor registra los datos personales básicos, información de contacto y preferencias de viaje.
+
+Solicitud de viaje: se capturan el destino, las fechas estimadas, el presupuesto y las necesidades del cliente.
+
+Oportunidad comercial: se crea una oportunidad para controlar el avance de la posible venta.
+
+Cotización: el asesor elabora una propuesta con los servicios solicitados, precios, condiciones y total correspondiente.
+
+Seguimiento: se registran llamadas, mensajes, reuniones, notas y tareas pendientes.
+
+Cierre de oportunidad: se actualiza el resultado de la negociación como ganada o perdida.
+
+Registro de reserva: cuando se confirma una venta, se genera un registro interno con los datos principales del viaje.
+
+Historial del cliente: toda la información permanece relacionada con el perfil del cliente para consultas posteriores.
+
+Módulos de la solución
+
+4.1. Autenticación y usuarios
+Permitirá el acceso seguro al sistema mediante credenciales y administrará los permisos correspondientes a los roles de Administrador y Asesor de viajes.
+
+4.2. Clientes y prospectos
+Permitirá registrar, consultar, actualizar y clasificar clientes y prospectos, incluyendo información de contacto, origen, preferencias de viaje e historial comercial.
+
+4.3. Viajeros relacionados
+Permitirá registrar a las personas que participarán en un viaje y asociarlas con el cliente principal, la solicitud o la reserva correspondiente.
+
+4.4. Solicitudes de viaje
+Permitirá registrar las necesidades de los clientes, incluyendo destino, fechas, presupuesto, número de viajeros, comentarios y asesor responsable.
+
+4.5. Oportunidades comerciales
+Permitirá administrar las oportunidades de venta mediante un pipeline que represente las diferentes etapas del proceso comercial, desde la solicitud inicial hasta su cierre.
+
+4.6. Cotizaciones
+Permitirá elaborar cotizaciones con múltiples servicios, cantidades, precios, impuestos, subtotales y total general, conservando sus diferentes versiones y estados.
+
+4.7. Seguimiento de actividades
+Permitirá registrar interacciones con los clientes, programar tareas y consultar actividades pendientes, completadas o vencidas.
+
+4.8. Reservas y ventas
+Permitirá registrar internamente las ventas confirmadas, asociándolas con el cliente, la oportunidad y la cotización aceptada.
+
+4.9. Pagos de referencia
+Permitirá registrar información de anticipos y liquidaciones para calcular el saldo pendiente de cada reserva, sin realizar transacciones bancarias.
+
+4.10. Panel de indicadores y reportes
+Mostrará información comercial relevante, como clientes registrados, oportunidades por etapa, ventas confirmadas, tareas pendientes, destinos solicitados y tasa de conversión.
+
+4.11. Búsquedas y auditoría
+Permitirá localizar información mediante filtros y conservar datos básicos de creación, modificación y responsables de las operaciones.
+
+Arquitectura propuesta
+Se plantea utilizar una arquitectura web modular por capas que permita separar las responsabilidades del sistema y facilitar su mantenimiento.
+La solución estará organizada en los siguientes componentes:
+
+Interfaz de usuario (Frontend): aplicación web responsiva mediante la cual administradores y asesores interactuarán con el CRM.
+
+API y lógica de negocio (Backend): procesamiento de solicitudes, validación de información, aplicación de reglas comerciales y comunicación con la base de datos.
+
+Base de datos relacional: almacenamiento estructurado de usuarios, clientes, viajeros, solicitudes, oportunidades, cotizaciones, actividades, reservas y pagos.
+
+Seguridad: autenticación, autorización por roles, protección de sesiones y validación de datos.
+
+Auditoría y monitoreo: registro de operaciones relevantes, errores y eventos técnicos.
+
+La arquitectura considerará interfaces que permitan incorporar posteriormente los módulos ERP y punto de venta sin que dichas integraciones formen parte de la implementación actual.
+Las tecnologías específicas de frontend, backend, base de datos y despliegue se seleccionarán mediante una evaluación de alternativas, considerando conocimientos del equipo, costo, seguridad, soporte y mantenibilidad.
+
+Metodología de desarrollo
+El proyecto se desarrollará utilizando el marco de trabajo Scrum, organizado en sprints de dos semanas.
+Azure DevOps se utilizará para apoyar la gestión y seguimiento del desarrollo mediante:
+
+Azure Boards: administración del Product Backlog, historias de usuario, tareas y seguimiento de sprints.
+
+Azure Repos: control de versiones del código fuente mediante Git.
+
+Azure Pipelines: automatización de compilación, pruebas e integración continua.
+
+Azure Wiki: documentación del análisis, requerimientos, arquitectura, acuerdos y avances del proyecto.
+
+Se aplicarán prácticas de revisión de código, pruebas funcionales, control de cambios y documentación continua para mantener la calidad del producto.
+
+Beneficios esperados
+La implementación del CRM permitirá:
+
+Centralizar la información de clientes y prospectos en un solo sistema.
+
+Reducir la duplicidad y dispersión de registros.
+
+Mejorar el control y seguimiento de solicitudes de viaje.
+
+Facilitar la elaboración y administración de cotizaciones.
+
+Conocer el estado de cada oportunidad comercial.
+
+Mantener un historial de interacciones, reservas y ventas.
+
+Facilitar la identificación de tareas pendientes.
+
+Consultar indicadores para apoyar la toma de decisiones.
+
+Establecer una base tecnológica para futuras integraciones con el ERP y el punto de venta.
+
+Alcance de implementación
+La primera versión se enfocará en las funcionalidades esenciales del CRM: autenticación, clientes, prospectos, oportunidades, cotizaciones, actividades, reservas, búsquedas y almacenamiento persistente.
+Los pagos informativos, reportes, catálogo básico de proveedores y exportación de cotizaciones se consideran funcionalidades de prioridad media.
+Las reservaciones en tiempo real, emisión de boletos, procesamiento bancario, facturación electrónica, portal del cliente e integraciones automáticas con plataformas externas quedan fuera del alcance de esta etapa.
+
+Resultado esperado
+Al finalizar el desarrollo se espera contar con un módulo CRM web funcional que permita demostrar el proceso comercial de una agencia de viajes, desde el registro inicial de un prospecto hasta la confirmación de una reserva.
+El sistema deberá conservar la información relacionada con cada cliente, facilitar el seguimiento de oportunidades y permitir consultar indicadores básicos de la operación comercial.
+La solución constituirá la primera etapa del sistema integral ERP con punto de venta y CRM, proporcionando una base organizada y mantenible para su evolución futura.
+
+---------------------------
+Requerimientos
+
+Requerimientos funcionales
+Los requerimientos funcionales describen las operaciones que deberá realizar el módulo CRM de la agencia de viajes durante la primera etapa del proyecto.
+
+RF-01. Autenticación y gestión de usuarios
+El sistema deberá permitir iniciar y cerrar sesión mediante correo electrónico o usuario y contraseña.
+
+Deberá manejar dos roles: Administrador y Asesor de viajes.
+
+El administrador podrá gestionar usuarios y consultar toda la información.
+
+Los asesores podrán administrar los registros correspondientes según sus permisos.
+
+El sistema deberá restringir el acceso a funcionalidades según el rol.
+
+RF-02. Gestión de clientes y prospectos
+Registrar, consultar, actualizar y administrar clientes y prospectos.
+
+Almacenar nombre, teléfono, correo, ubicación y medio de contacto preferido.
+
+Clasificar los contactos como prospectos, clientes activos o inactivos.
+
+Registrar el origen del prospecto.
+
+Guardar preferencias de viaje, destinos de interés y presupuesto aproximado.
+
+Validar correos y teléfonos para disminuir registros duplicados.
+
+Consultar el historial comercial de cada cliente.
+
+RF-03. Registro de viajeros
+Registrar viajeros asociados a un cliente, solicitud o reserva.
+
+Almacenar nombre, fecha de nacimiento opcional y relación con el cliente principal.
+
+Registrar la cantidad de adultos, menores e infantes.
+
+Relacionar varios viajeros con una misma solicitud o reserva.
+
+RF-04. Gestión de solicitudes de viaje
+Registrar solicitudes realizadas por clientes o prospectos.
+
+Almacenar destino, fechas estimadas, número de viajeros, presupuesto y necesidades específicas.
+
+Asociar cada solicitud con un asesor responsable.
+
+Administrar los estados: Nueva, En revisión, Contactado, Atendida y Cancelada.
+
+Registrar notas e interacciones relacionadas con la solicitud.
+
+RF-05. Gestión de oportunidades comerciales
+Crear oportunidades de venta relacionadas con solicitudes de viaje.
+
+Asignar un asesor responsable.
+
+Administrar las etapas: Solicitud recibida, Cotización, Seguimiento, Negociación, Ganada y Perdida.
+
+Actualizar el estado de las oportunidades.
+
+Consultar el historial de actividades relacionadas.
+
+Visualizar el avance mediante un pipeline comercial.
+
+RF-06. Gestión de cotizaciones
+Crear cotizaciones asociadas a oportunidades comerciales.
+
+Generar un folio interno para cada cotización.
+
+Registrar vigencia, servicios incluidos, cantidades, precios unitarios, impuestos y cargos.
+
+Calcular subtotales y total general.
+
+Registrar condiciones comerciales y observaciones.
+
+Permitir diferentes versiones de una cotización.
+
+Administrar estados: Borrador, Enviada, Aceptada, Rechazada y Vencida.
+
+Considerar la exportación a PDF como funcionalidad de prioridad media.
+
+RF-07. Seguimiento e historial de interacciones
+Registrar llamadas, mensajes, correos electrónicos, reuniones y notas.
+
+Almacenar fecha, descripción, resultado y usuario responsable.
+
+Crear tareas de seguimiento con fecha límite.
+
+Administrar tareas pendientes y completadas.
+
+Mostrar cronológicamente el historial de interacciones.
+
+Visualizar avisos de actividades próximas o vencidas.
+
+RF-08. Gestión de reservas y ventas
+Registrar reservas internas relacionadas con oportunidades ganadas.
+
+Asociar cada reserva con el cliente y la cotización aceptada.
+
+Generar un folio interno de reserva.
+
+Registrar destino, fechas, servicios confirmados y proveedor de referencia.
+
+Almacenar importe total, monto pagado de referencia y saldo pendiente.
+
+Administrar estados: Pendiente de pago, Confirmada, En viaje, Completada y Cancelada.
+
+Permitir registrar localizadores externos manualmente.
+
+RF-09. Registro informativo de pagos
+Registrar pagos de referencia asociados a reservas.
+
+Almacenar fecha, monto, método informado, referencia y observaciones.
+
+Calcular el total de pagos registrados.
+
+Mostrar el saldo pendiente de la reserva.
+
+Mantener un historial informativo de los movimientos.
+
+RF-10. Panel principal y reportes
+Mostrar el número de clientes y prospectos registrados.
+
+Consultar oportunidades por etapa comercial.
+
+Mostrar oportunidades ganadas y perdidas.
+
+Visualizar el valor de ventas y reservas registradas.
+
+Identificar tareas próximas y vencidas.
+
+Mostrar destinos más solicitados.
+
+Calcular la tasa básica de conversión comercial.
+
+Filtrar indicadores por fecha y asesor cuando corresponda.
+
+RF-11. Búsquedas y filtros
+Buscar clientes por nombre, teléfono o correo electrónico.
+
+Buscar oportunidades, cotizaciones y reservas por folio.
+
+Filtrar registros por estado, asesor, fechas, destino y etapa comercial.
+
+Facilitar la consulta de información relacionada.
+
+RF-12. Auditoría y trazabilidad
+Registrar fechas de creación y última modificación.
+
+Identificar al usuario responsable de determinadas acciones.
+
+Mantener relaciones entre clientes, oportunidades, cotizaciones, actividades y reservas.
+
+Conservar el historial de las operaciones comerciales.
+
+RF-13. Catálogo básico de proveedores
+Contemplar el registro de proveedores de referencia para los servicios ofrecidos.
+
+Permitir relacionar proveedores con conceptos de cotización y reservas cuando corresponda.
+
+Considerar su implementación según la prioridad y disponibilidad del proyecto.
+
+Requerimientos no funcionales
+RNF-01. Seguridad
+El sistema deberá utilizar contraseñas almacenadas mediante algoritmos de hash seguros, sesiones protegidas, validación de entradas y autorización basada en roles.
+
+RNF-02. Privacidad
+El sistema deberá recopilar únicamente los datos personales necesarios y restringir su consulta a usuarios autorizados.
+
+RNF-03. Rendimiento
+Las consultas habituales de clientes, oportunidades y reservas deberán responder de manera fluida para el volumen de información previsto.
+
+RNF-04. Integridad de datos
+Se utilizará una base de datos relacional con claves primarias, relaciones y restricciones que eviten registros inconsistentes.
+
+RNF-05. Disponibilidad y respaldos
+Se establecerán mecanismos de respaldo periódico y recuperación de la información según los ambientes disponibles.
+
+RNF-06. Usabilidad
+La aplicación deberá contar con navegación clara, formularios comprensibles, validaciones visibles y una interfaz adaptable a computadoras y dispositivos móviles.
+
+RNF-07. Mantenibilidad
+La arquitectura deberá separar la interfaz, la lógica de negocio y el acceso a datos para facilitar correcciones y futuras ampliaciones.
+
+RNF-08. Compatibilidad
+El sistema deberá funcionar mediante navegadores web modernos, sin requerir una aplicación móvil nativa.
+
+RNF-09. Registro de errores
+La aplicación deberá registrar errores técnicos sin mostrar información sensible al usuario final.
+
+RNF-10. Escalabilidad e interoperabilidad
+La arquitectura deberá permitir futuras integraciones con los módulos ERP y punto de venta, sin implementarlas durante esta etapa.
+
+Priorización
+Prioridad alta (MVP): autenticación, clientes, prospectos, oportunidades, pipeline comercial, actividades, cotizaciones, reservas, búsquedas y base de datos.
+Prioridad media: pagos informativos, dashboard, reportes, catálogo básico de proveedores y exportación de cotizaciones.
+Prioridad futura: integraciones externas, procesamiento de pagos, facturación, reservaciones en tiempo real, portal del cliente y automatización avanzada.

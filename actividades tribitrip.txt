@@ -1,0 +1,424 @@
+EPIC F01 — Autenticación y gestión de usuarios
+Descripción del Epic: Desarrollar los mecanismos de acceso al CRM, administración de cuentas y control de permisos para los roles de administrador y asesor de viajes.
+Issue HU-001 — Iniciar sesión en el sistema
+Alta
+
+Semana 2
+
+Descripción: Como usuario autorizado, quiero iniciar sesión mediante correo electrónico y contraseña para acceder de forma segura a las funcionalidades correspondientes a mi rol.
+
+Criterios de aceptación: El sistema valida las credenciales, permite el acceso a usuarios activos, rechaza credenciales incorrectas, protege las rutas privadas y permite cerrar sesión.
+
+Tasks:
+- T01. Diseñar la tabla de usuarios y los campos de autenticación.
+- T02. Implementar el almacenamiento seguro de contraseñas.
+- T03. Desarrollar el endpoint de inicio de sesión.
+- T04. Implementar validación de tokens y protección de rutas.
+- T05. Crear la interfaz de inicio de sesión.
+- T06. Integrar el formulario con la API.
+- T07. Implementar cierre de sesión y manejo de errores.
+- T08. Ejecutar pruebas de autenticación.
+
+
+Issue HU-002 — Administrar usuarios y roles
+Alta
+
+Semana 2
+
+Descripción: Como administrador, quiero crear, consultar, editar y desactivar usuarios, asignándoles permisos de acuerdo con su rol, para controlar el acceso al CRM.
+
+Criterios de aceptación: El administrador gestiona usuarios, puede asignar roles y desactivar cuentas; los asesores no pueden realizar acciones administrativas.
+
+Tasks:
+- T01. Definir la matriz de permisos por rol.
+- T02. Implementar las operaciones CRUD de usuarios.
+- T03. Desarrollar middleware de autorización por roles.
+- T04. Crear la interfaz de administración de usuarios.
+- T05. Implementar activación y desactivación de cuentas.
+- T06. Validar permisos desde frontend y backend.
+- T07. Realizar pruebas de autorización.
+
+
+EPIC F02 — Gestión de clientes, prospectos y viajeros
+Descripción del Epic: Centralizar la información de clientes y prospectos, sus preferencias y los viajeros relacionados con sus solicitudes.
+Issue HU-003 — Registrar clientes y prospectos
+Alta
+
+Semana 2
+
+Descripción: Como asesor, quiero registrar los datos de clientes y prospectos para mantener organizada la información de contacto y dar seguimiento a sus necesidades.
+
+Criterios de aceptación: Se pueden registrar nombre, teléfono, correo, origen del prospecto y estado; los campos obligatorios se validan y se advierte sobre posibles duplicados.
+
+Tasks:
+- T01. Diseñar las entidades de clientes y prospectos.
+- T02. Crear tablas, relaciones y restricciones en PostgreSQL.
+- T03. Implementar el endpoint de registro.
+- T04. Desarrollar validaciones de campos y duplicados.
+- T05. Crear el formulario de registro en React.
+- T06. Integrar el formulario con el backend.
+- T07. Probar registros válidos, inválidos y duplicados.
+
+
+Issue HU-004 — Consultar y actualizar clientes
+Alta
+
+Semana 2
+
+Descripción: Como asesor, quiero consultar y modificar la información de los clientes para mantener actualizados sus datos y preferencias.
+
+Criterios de aceptación: El usuario puede buscar clientes, consultar su ficha, editar datos permitidos y visualizar la información comercial asociada.
+
+Tasks:
+- T01. Implementar endpoints de listado, consulta y actualización.
+- T02. Desarrollar consultas por nombre, teléfono y correo.
+- T03. Crear tabla de clientes con paginación básica.
+- T04. Crear vista de detalle del cliente.
+- T05. Implementar formulario de edición.
+- T06. Mostrar las solicitudes y oportunidades asociadas cuando existan.
+- T07. Probar consultas, filtros y actualizaciones.
+
+
+Issue HU-005 — Registrar viajeros relacionados
+Media
+
+Semana 2–3
+
+Descripción: Como asesor, quiero registrar los viajeros asociados a una solicitud para identificar a las personas que participarán en el viaje.
+
+Criterios de aceptación: Se pueden registrar viajeros vinculados al cliente principal, consultar sus datos y mantener la relación con la solicitud correspondiente.
+
+Tasks:
+- T01. Diseñar la entidad de viajeros y sus relaciones.
+- T02. Implementar endpoints para registrar y consultar viajeros.
+- T03. Crear formulario de viajeros y acompañantes.
+- T04. Asociar viajeros con clientes y solicitudes.
+- T05. Validar cantidades y datos obligatorios.
+- T06. Realizar pruebas de asociación y consulta.
+
+
+EPIC F03 — Solicitudes de viaje y oportunidades comerciales
+Descripción del Epic: Registrar las necesidades de viaje y administrar el avance de las oportunidades dentro del proceso de ventas.
+Issue HU-006 — Registrar solicitudes de viaje
+Alta
+
+Semana 3
+
+Descripción: Como asesor, quiero registrar destino, fechas, presupuesto y número de viajeros para identificar las necesidades de cada prospecto.
+
+Criterios de aceptación: La solicitud queda vinculada a un cliente, contiene los datos principales del viaje y puede consultarse y actualizarse.
+
+Tasks:
+- T01. Diseñar la tabla de solicitudes y sus relaciones.
+- T02. Implementar endpoints para crear, consultar y actualizar solicitudes.
+- T03. Crear formulario de solicitud de viaje.
+- T04. Implementar campos de destino, fechas, presupuesto y viajeros.
+- T05. Asociar solicitudes a clientes y asesores.
+- T06. Validar fechas, importes y campos obligatorios.
+- T07. Probar el registro y la consulta de solicitudes.
+
+
+Issue HU-007 — Gestionar oportunidades comerciales
+Alta
+
+Semana 3
+
+Descripción: Como asesor, quiero administrar oportunidades comerciales para dar seguimiento a los prospectos durante el proceso de venta.
+
+Criterios de aceptación: Se pueden crear oportunidades, asignar responsables, actualizar etapas y registrar resultados ganados o perdidos.
+
+Tasks:
+- T01. Diseñar la entidad de oportunidades.
+- T02. Definir las etapas del proceso comercial.
+- T03. Implementar endpoints de oportunidades.
+- T04. Desarrollar el formulario de creación y edición.
+- T05. Implementar asignación de asesores.
+- T06. Registrar cambios de estado y resultado comercial.
+- T07. Realizar pruebas de transición entre etapas.
+
+
+Issue HU-008 — Visualizar embudo de ventas
+Media
+
+Semana 3–4
+
+Descripción: Como administrador, quiero visualizar las oportunidades agrupadas por etapa para identificar el estado del proceso comercial.
+
+Criterios de aceptación: Las oportunidades se muestran agrupadas por etapa, pueden filtrarse y permiten acceder a su detalle.
+
+Tasks:
+- T01. Implementar consultas de oportunidades por etapa.
+- T02. Crear vista de embudo o tablero comercial.
+- T03. Mostrar cantidad de oportunidades por etapa.
+- T04. Implementar filtros por asesor y estado.
+- T05. Vincular las tarjetas con el detalle de la oportunidad.
+- T06. Realizar pruebas de visualización y filtros.
+
+
+EPIC F04 — Gestión de cotizaciones
+Descripción del Epic: Permitir a los asesores consultar servicios turísticos, elaborar propuestas económicas personalizadas y administrar las cotizaciones realizadas a los clientes.
+Issue HU-009 — Consultar catálogo básico de servicios turísticos
+Media
+
+Semana 3
+
+Descripción: Como asesor de viajes, quiero consultar los paquetes y servicios turísticos disponibles para seleccionar las alternativas que mejor se adapten a las necesidades del cliente.
+
+Criterios de aceptación:
+- Se pueden consultar los servicios y paquetes registrados.
+- Cada servicio muestra nombre, descripción, precio de referencia y proveedor cuando corresponda.
+- Se pueden buscar servicios por nombre o destino.
+- Los servicios pueden seleccionarse para incorporarlos a una cotización.
+Tasks:
+- T01. Diseñar el modelo de datos del catálogo básico.
+- T02. Crear tablas de servicios, paquetes y precios de referencia.
+- T03. Implementar endpoints de consulta del catálogo.
+- T04. Crear la interfaz de listado de servicios.
+- T05. Implementar búsqueda y filtros por destino.
+- T06. Integrar la selección de servicios con el cotizador.
+- T07. Realizar pruebas de consulta y selección.
+
+
+Issue HU-010 — Generar cotizaciones personalizadas
+Alta
+
+Semana 3
+
+Descripción: Como asesor de viajes, quiero generar cotizaciones personalizadas con diferentes servicios turísticos para ofrecer propuestas ajustadas al presupuesto y preferencias del cliente.
+
+Criterios de aceptación:
+- La cotización se vincula a un cliente y una oportunidad.
+- Se pueden agregar múltiples conceptos con cantidad y precio unitario.
+- El sistema calcula automáticamente subtotales y total.
+- Se pueden registrar vigencia, observaciones y condiciones.
+- Cada cotización tiene un folio interno único.
+- Se puede guardar y consultar posteriormente.
+Tasks:
+- T01. Diseñar las entidades de cotizaciones y detalles de cotización.
+- T02. Crear las tablas y relaciones en PostgreSQL.
+- T03. Implementar el endpoint de creación de cotizaciones.
+- T04. Implementar el cálculo de subtotales y totales en backend.
+- T05. Crear la interfaz del cotizador.
+- T06. Implementar la adición, edición y eliminación de conceptos.
+- T07. Integrar la selección de servicios turísticos.
+- T08. Implementar la generación de folios internos.
+- T09. Validar cantidades, importes y campos obligatorios.
+- T10. Ejecutar pruebas de cálculos y persistencia.
+
+
+Issue HU-011 — Administrar cotizaciones y sus estados
+Alta
+
+Semana 3–4
+
+Descripción: Como asesor, quiero consultar, modificar y actualizar el estado de las cotizaciones para conocer cuáles están pendientes, aceptadas o rechazadas.
+
+Criterios de aceptación:
+- Se pueden consultar las cotizaciones asociadas a una oportunidad.
+- Se manejan estados de borrador, enviada, aceptada, rechazada y vencida.
+- Se pueden crear versiones de una propuesta sin perder las anteriores.
+- Los cambios de estado se guardan correctamente.
+- Se puede identificar la cotización aceptada.
+Tasks:
+- T01. Definir reglas de transición entre estados.
+- T02. Implementar endpoints de consulta y actualización.
+- T03. Implementar versionado de cotizaciones.
+- T04. Crear el listado de cotizaciones.
+- T05. Desarrollar la vista de detalle.
+- T06. Implementar controles para actualizar estados.
+- T07. Validar restricciones de modificación.
+- T08. Probar el historial y los cambios de estado.
+
+
+Issue HU-012 — Generar documento de cotización
+Media
+
+Semana 4
+
+Descripción: Como asesor, quiero generar una cotización en un formato imprimible para compartir una propuesta clara y profesional con el cliente.
+
+Criterios de aceptación:
+- El documento muestra los datos del cliente y de la agencia.
+- Incluye servicios, cantidades, precios y total.
+- Presenta vigencia, condiciones y folio.
+- Puede imprimirse o exportarse a PDF.
+- Los importes coinciden con los registrados en el sistema.
+Tasks:
+- T01. Diseñar la plantilla del documento.
+- T02. Implementar la obtención de datos de la cotización.
+- T03. Desarrollar la generación del documento.
+- T04. Incorporar datos del cliente, conceptos y condiciones.
+- T05. Implementar la opción de impresión o PDF.
+- T06. Validar formato y cálculos.
+- T07. Realizar pruebas con cotizaciones de diferentes tamaños.
+
+
+EPIC F05 — Seguimiento e interacciones comerciales
+Descripción del Epic: Registrar el historial de comunicación con los clientes y organizar las tareas de seguimiento de los asesores.
+Issue HU-013 — Registrar interacciones con clientes
+Alta
+
+Semana 3
+
+Descripción: Como asesor de viajes, quiero registrar llamadas, mensajes, reuniones y observaciones para mantener un historial de las comunicaciones con cada cliente.
+
+Criterios de aceptación:
+- Se pueden registrar interacciones asociadas a clientes u oportunidades.
+- Cada interacción contiene tipo, fecha, descripción y responsable.
+- El historial se muestra cronológicamente.
+- Las interacciones permanecen disponibles para consulta posterior.
+Tasks:
+- T01. Diseñar la entidad de interacciones comerciales.
+- T02. Crear las relaciones con clientes y oportunidades.
+- T03. Implementar endpoints de registro y consulta.
+- T04. Desarrollar el formulario de nueva interacción.
+- T05. Crear la vista de historial cronológico.
+- T06. Integrar el historial en la ficha del cliente.
+- T07. Ejecutar pruebas de registro y consulta.
+
+
+Issue HU-014 — Programar tareas de seguimiento
+Alta
+
+Semana 3–4
+
+Descripción: Como asesor, quiero programar tareas de seguimiento con fechas límite para recordar las actividades pendientes y evitar perder oportunidades de venta.
+
+Criterios de aceptación:
+- Se pueden crear tareas vinculadas a clientes u oportunidades.
+- Cada tarea tiene descripción, responsable, fecha límite y estado.
+- Se pueden marcar tareas como completadas.
+- Se identifican las tareas pendientes y vencidas.
+- Se pueden consultar las tareas asignadas al usuario.
+Tasks:
+- T01. Diseñar la entidad de tareas de seguimiento.
+- T02. Implementar endpoints de creación y actualización.
+- T03. Crear formulario de programación de tareas.
+- T04. Desarrollar el listado de tareas pendientes.
+- T05. Implementar indicadores de tareas vencidas.
+- T06. Integrar tareas con oportunidades y clientes.
+- T07. Probar fechas límite, responsables y estados.
+
+
+EPIC F06 — Reservas y pagos informativos
+Descripción del Epic: Registrar las reservas derivadas de cotizaciones aceptadas y llevar un control informativo de los pagos reportados, sin procesar transacciones bancarias.
+Issue HU-015 — Registrar reservas de clientes
+Alta
+
+Semana 4
+
+Descripción: Como asesor de viajes, quiero registrar una reserva a partir de una cotización aceptada para conservar la información de los servicios contratados por el cliente.
+
+Criterios de aceptación:
+- Una reserva puede generarse a partir de una cotización aceptada.
+- Se conserva la información del cliente, servicios, fechas e importes.
+- Cada reserva tiene un folio interno.
+- Se puede consultar y actualizar su estado.
+- La reserva aparece en el historial comercial del cliente.
+- El registro es interno y no realiza reservas reales en sistemas externos.
+Tasks:
+- T01. Diseñar la entidad de reservas.
+- T02. Crear las relaciones con clientes y cotizaciones.
+- T03. Implementar el endpoint de creación de reservas.
+- T04. Validar que la cotización se encuentre aceptada.
+- T05. Implementar generación de folio de reserva.
+- T06. Crear la interfaz de registro y consulta.
+- T07. Implementar estados de reserva.
+- T08. Integrar reservas con el historial del cliente.
+- T09. Realizar pruebas del flujo cotización-reserva.
+
+
+Issue HU-016 — Registrar pagos informativos
+Media
+
+Semana 4
+
+Descripción: Como asesor, quiero registrar los pagos informados por los clientes para conocer cuánto han cubierto y cuál es el saldo pendiente de cada reserva.
+
+Criterios de aceptación:
+- Se pueden registrar fecha, monto, método informado y referencia.
+- Cada pago se asocia a una reserva.
+- Se calcula el total registrado y el saldo pendiente.
+- Se puede consultar el historial de pagos.
+- No se ejecutan cargos bancarios ni se procesan pagos electrónicos.
+Tasks:
+- T01. Diseñar la entidad de pagos informativos.
+- T02. Crear relaciones con las reservas.
+- T03. Implementar endpoints de registro y consulta.
+- T04. Implementar el cálculo de saldos.
+- T05. Crear formulario de registro de pagos.
+- T06. Desarrollar el historial de pagos por reserva.
+- T07. Validar importes y referencias.
+- T08. Realizar pruebas de cálculo y persistencia.
+
+
+EPIC F07 — Dashboard, reportes y búsquedas
+Descripción del Epic: Facilitar la consulta de información y la supervisión de los resultados comerciales mediante indicadores, reportes y filtros.
+Issue HU-017 — Consultar indicadores comerciales
+Media
+
+Semana 4
+
+Descripción: Como administrador, quiero visualizar indicadores de clientes, oportunidades, cotizaciones y ventas para evaluar el desempeño comercial de la agencia.
+
+Criterios de aceptación:
+- Se muestra la cantidad de clientes y prospectos registrados.
+- Se muestran oportunidades abiertas, ganadas y perdidas.
+- Se calcula una tasa básica de conversión.
+- Se muestra el importe de las ventas registradas.
+- Se identifican tareas pendientes y vencidas.
+- Los indicadores corresponden a la información almacenada.
+Tasks:
+- T01. Definir los indicadores y sus fórmulas.
+- T02. Implementar consultas agregadas en la base de datos.
+- T03. Crear endpoints de indicadores.
+- T04. Diseñar la interfaz del dashboard.
+- T05. Implementar tarjetas y gráficas básicas.
+- T06. Integrar el dashboard con la API.
+- T07. Validar los cálculos utilizando datos de prueba.
+
+
+Issue HU-018 — Consultar reportes comerciales
+Media
+
+Semana 4
+
+Descripción: Como administrador, quiero consultar reportes de destinos solicitados y resultados comerciales para identificar tendencias y apoyar la toma de decisiones.
+
+Criterios de aceptación:
+- Se pueden consultar los destinos más solicitados.
+- Se muestran las ventas registradas por periodo.
+- Se pueden filtrar resultados por fechas.
+- Los resultados se presentan mediante tablas o gráficas.
+- La información coincide con los registros del CRM.
+Tasks:
+- T01. Definir los reportes y sus métricas.
+- T02. Implementar consultas de destinos y ventas.
+- T03. Crear endpoints de reportes.
+- T04. Desarrollar componentes de tablas y gráficas.
+- T05. Implementar filtros por periodo.
+- T06. Integrar las consultas con el frontend.
+- T07. Realizar pruebas de exactitud de resultados.
+
+
+Issue HU-019 — Buscar y filtrar registros
+Alta
+
+Semanas 2–4
+
+Descripción: Como usuario autorizado, quiero buscar y filtrar clientes, oportunidades, cotizaciones y reservas para encontrar rápidamente la información que necesito.
+
+Criterios de aceptación:
+- Se pueden buscar clientes por nombre o datos de contacto.
+- Se pueden localizar cotizaciones y reservas por folio.
+- Se pueden filtrar oportunidades y reservas por estado.
+- Los resultados corresponden a los criterios seleccionados.
+- Las búsquedas respetan los permisos del usuario.
+Tasks:
+- T01. Definir los criterios de búsqueda por módulo.
+- T02. Implementar filtros y parámetros de consulta en los endpoints.
+- T03. Crear componentes reutilizables de búsqueda.
+- T04. Integrar filtros en las pantallas de clientes y oportunidades.
+- T05. Integrar filtros en cotizaciones y reservas.
+- T06. Implementar estados sin resultados y manejo de errores.
+- T07. Realizar pruebas de búsqueda y permisos.

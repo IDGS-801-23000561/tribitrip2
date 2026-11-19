@@ -1,0 +1,26 @@
+Cronograma de desarrollo — TribiTrip
+Versión preliminar
+Duración: 5 semanas
+Alcance: MVP del módulo CRM
+Metodología: Scrum y Kanban
+
+Distribución de actividades
+Actividad	S1	S2	S3	S4	S5
+Análisis y diseño	X				
+F01 — Autenticación y usuarios		X			
+F02 — Clientes, prospectos y viajeros		X	X		
+F03 — Solicitudes y oportunidades			X	X	
+F04 — Cotizaciones			X	X	
+F06 — Reservas y pagos informativos				X	
+F07 — Dashboard, reportes y búsquedas		X	X	X	
+Integración y pruebas		X	X	X	X
+Documentación y despliegue					X
+Alcance
+Se incluyen 6 épicas y 17 historias de usuario. La épica F05 — Seguimiento e interacciones comerciales queda excluida.
+
+Entregables
+Semana 1: requerimientos, arquitectura, prototipos y entorno configurado.
+Semana 2: autenticación, roles y gestión de clientes.
+Semana 3: solicitudes, oportunidades y cotizador.
+Semana 4: reservas, pagos informativos, dashboard y reportes.
+Semana 5: pruebas finales, documentación y despliegue.

@@ -1,4 +1,3 @@
-
 const indicadores = [
   {
     titulo: "Clientes registrados",
@@ -28,18 +27,14 @@ function Dashboard() {
       <div className="bienvenida">
         <h2>Bienvenido a TribiTrip</h2>
         <p>
-          Administra clientes, solicitudes de viaje,
-          oportunidades comerciales y reservas
-          desde un solo lugar.
+          Administra clientes, solicitudes de viaje, oportunidades comerciales y
+          reservas desde un solo lugar.
         </p>
       </div>
 
       <div className="indicadores">
         {indicadores.map((indicador) => (
-          <article
-            className="indicador-card"
-            key={indicador.titulo}
-          >
+          <article className="indicador-card" key={indicador.titulo}>
             <span>{indicador.titulo}</span>
             <strong>{indicador.valor}</strong>
             <small>{indicador.descripcion}</small>
@@ -52,8 +47,8 @@ function Dashboard() {
         <div className="estado-vacio">
           <p>No hay actividades registradas.</p>
           <span>
-            Las interacciones y tareas de seguimiento
-            aparecerán aquí cuando estén disponibles.
+            Las interacciones y tareas de seguimiento aparecerán aquí cuando
+            estén disponibles.
           </span>
         </div>
       </section>

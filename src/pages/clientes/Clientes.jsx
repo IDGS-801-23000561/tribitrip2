@@ -29,10 +29,19 @@ function Clientes() {
 
   useEffect(() => {
     let active = true;
-    api('/clientes').then(data => { if (active) setClientes(data); })
-      .catch(e => { if (active) setError(e.message); })
-      .finally(() => { if (active) setCargando(false); });
-    return () => { active = false; };
+    api("/clientes")
+      .then((data) => {
+        if (active) setClientes(data);
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      })
+      .finally(() => {
+        if (active) setCargando(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const clientesFiltrados = useMemo(() => {
@@ -144,15 +153,29 @@ function Clientes() {
       telefono,
       ubicacion: formulario.ubicacion.trim(),
       destinoInteres: formulario.destinoInteres.trim(),
-      presupuesto: formulario.presupuesto !== "" && formulario.presupuesto !== null ? Number(formulario.presupuesto) : "",
+      presupuesto:
+        formulario.presupuesto !== "" && formulario.presupuesto !== null
+          ? Number(formulario.presupuesto)
+          : "",
     };
 
     setGuardando(true);
     try {
-      const saved = await api('/clientes' + (editandoId ? '/' + editandoId : ''), { method: editandoId ? 'PUT' : 'POST', body: datos });
-      setClientes(prev => editandoId ? prev.map(c => c.id === editandoId ? saved : c) : [saved, ...prev]);
+      const saved = await api(
+        "/clientes" + (editandoId ? "/" + editandoId : ""),
+        { method: editandoId ? "PUT" : "POST", body: datos },
+      );
+      setClientes((prev) =>
+        editandoId
+          ? prev.map((c) => (c.id === editandoId ? saved : c))
+          : [saved, ...prev],
+      );
       cerrarFormulario();
-    } catch (err) { setError(err.message); } finally { setGuardando(false); }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setGuardando(false);
+    }
   }
 
   function eliminarCliente(cliente) {
@@ -163,11 +186,15 @@ function Clientes() {
     if (!clienteAEliminar || guardando) return;
     setGuardando(true);
     try {
-      await api('/clientes/' + clienteAEliminar.id, { method: 'DELETE' });
-      setClientes(prev => prev.filter(c => c.id !== clienteAEliminar.id));
+      await api("/clientes/" + clienteAEliminar.id, { method: "DELETE" });
+      setClientes((prev) => prev.filter((c) => c.id !== clienteAEliminar.id));
       setClienteAEliminar(null);
-    } catch (err) { setError(err.message); setClienteAEliminar(null); }
-    finally { setGuardando(false); }
+    } catch (err) {
+      setError(err.message);
+      setClienteAEliminar(null);
+    } finally {
+      setGuardando(false);
+    }
   }
 
   return (
@@ -182,7 +209,11 @@ function Clientes() {
           </p>
         </div>
 
-        <button className="btn-primary" disabled={cargando || guardando} onClick={nuevoCliente}>
+        <button
+          className="btn-primary"
+          disabled={cargando || guardando}
+          onClick={nuevoCliente}
+        >
           + Nuevo contacto
         </button>
       </div>
@@ -438,7 +469,11 @@ function Clientes() {
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary" disabled={guardando}>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={guardando}
+                >
                   {editandoId !== null
                     ? "Guardar cambios"
                     : "Registrar contacto"}

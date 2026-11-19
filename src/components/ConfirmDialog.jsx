@@ -1,14 +1,7 @@
-
 import { useEffect, useRef } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
-function ConfirmDialog({
-  abierto,
-  titulo,
-  mensaje,
-  onConfirmar,
-  onCancelar,
-}) {
+function ConfirmDialog({ abierto, titulo, mensaje, onConfirmar, onCancelar }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -47,19 +40,11 @@ function ConfirmDialog({
       <p>{mensaje}</p>
 
       <div className="confirm-actions">
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={onCancelar}
-        >
+        <button type="button" className="btn-secondary" onClick={onCancelar}>
           Cancelar
         </button>
 
-        <button
-          type="button"
-          className="btn-danger"
-          onClick={onConfirmar}
-        >
+        <button type="button" className="btn-danger" onClick={onConfirmar}>
           Eliminar contacto
         </button>
       </div>
