@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api } from "../../services/api";
 import { useApiData } from "../../services/useApiData";
+import ListFilters, { Pagination } from "../../components/ListFilters";
+import { filterOptions, useFilteredList } from "../../services/useFilteredList";
+import { useSession } from "../../auth/session";
+import { etapas, estados } from "../../../shared/oportunidades.js";
 
 function NuevaOportunidad({ onCancel }) {
   const navigate = useNavigate();
@@ -70,16 +74,28 @@ function NuevaOportunidad({ onCancel }) {
 
 export default function Oportunidades() {
   const [creando, setCreando] = useState(false);
-  const { data: oportunidades, error } = useApiData("/oportunidades");
+  const { usuario } = useSession();
+  const admin = usuario.rol === "Administrador";
+  const list = useFilteredList("/oportunidades", admin ? ["estado", "etapa", "asesor"] : ["estado", "etapa"]);
+  const { data, error } = list;
+  const oportunidades = data?.items;
+  const { data: usuarios, error: usersError } = useApiData(admin ? "/usuarios" : null);
+  const selects = [
+    { name: "estado", label: "Estado comercial", options: filterOptions(estados) },
+    { name: "etapa", label: "Etapa", options: filterOptions(etapas) },
+    ...(admin ? [{ name: "asesor", label: "Asesor responsable", options: usuarios?.map(({ id, nombre }) => ({ value: id, label: nombre })) ?? [] }] : []),
+  ];
   return (
     <section className="panel">
       <h2>Oportunidades registradas</h2>
       {creando
         ? <NuevaOportunidad onCancel={() => setCreando(false)} />
         : <button className="btn-primary" onClick={() => setCreando(true)}>Nueva oportunidad</button>}
+      <ListFilters list={list} selects={selects} />
+      {usersError && <p role="alert">{usersError}</p>}
       {error && <p role="alert">{error}</p>}
       {!oportunidades && !error && <p role="status">Cargando oportunidades…</p>}
-      {oportunidades?.length === 0 && <p>No hay oportunidades registradas.</p>}
+      {oportunidades?.length === 0 && <p>No hay oportunidades para estos filtros.</p>}
       {oportunidades?.length > 0 && (
         <div className="tabla-contenedor">
           <table className="tabla-clientes">
@@ -97,6 +113,7 @@ export default function Oportunidades() {
           </table>
         </div>
       )}
+      <Pagination list={list} />
     </section>
   );
 }

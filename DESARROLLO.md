@@ -61,7 +61,19 @@ En el detalle, **Registrar pago informativo** captura fecha, monto, método, ref
 
 Para verificar con MongoDB en un entorno aislado, registra desde una cotización aceptada de oportunidad ganada y comprueba el historial del cliente, los estados, los índices únicos y la visibilidad con dos asesores. Repite el alta simultáneamente y comprueba que ambas respuestas señalen la misma reserva. Registra pagos concurrentes con un saldo insuficiente para ambos y verifica que la suma nunca exceda el importe acordado. Recarga el detalle en navegador y confirma que los datos históricos se conservan.
 
+## Ficha comercial, búsquedas y reportes
+
+Abre un cliente por su nombre en el listado para consultar su ficha y navegar a los registros relacionados. La ficha consulta los módulos de origen y la edición de contacto usa `revisionContacto` para detectar conflictos. Los documentos aceptados y las reservas conservan sus copias históricas.
+
+Los listados de clientes, oportunidades, cotizaciones y reservas aplican filtros y paginación en el servidor. El filtro por asesor en oportunidades es administrativo.
+
+En el dashboard, clientes son contactos activos e inactivos. Los prospectos se cuentan aparte. Conversión es ganadas entre ganadas y perdidas, o 0 si todavía no hay cierres. Las ventas suman el importe acordado de reservas no canceladas, incluidas pendientes de pago. Los pagos siguen siendo informativos.
+
+En **Reportes comerciales**, selecciona hasta 366 días inclusivos en Ciudad de México. Destinos usa la fecha de alta de la solicitud y agrupa variaciones de espacios, mayúsculas y acentos. Ventas usa la fecha de registro de la reserva, con agrupación mensual y la misma regla del dashboard. Una cancelación excluye la reserva de los reportes posteriores para su mes original.
+
 ## Verificación
+
+Consulta [PLAN_PRUEBAS_MVP.md](PLAN_PRUEBAS_MVP.md) para las pruebas en un entorno autorizado, incluida la revisión obligatoria de impresión y guardado como PDF.
 npm.cmd run lint
 npm.cmd run build
 npm.cmd --prefix server test

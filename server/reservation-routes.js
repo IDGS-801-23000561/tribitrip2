@@ -6,6 +6,7 @@ import { Cotizacion } from "./quote-models.js";
 import { datosCliente, fechaCiudadMexico, versionActual } from "./quote-lifecycle.js";
 import { clavePagoValida, referenciaPago, Reserva, transicionesReserva } from "./reservation-model.js";
 import { isCalendarDate } from "./travel-models.js";
+import { enumFilter, listResult, literal, searchText } from "./list-queries.js";
 
 const conflict = "La reserva cambió. Recarga el detalle y vuelve a intentarlo.";
 const terminal = (estado) => transicionesReserva[estado].length === 0;
@@ -51,28 +52,25 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
     }
   }
 
-  async function list(filter) {
-    const rows = await Reserva.find(filter)
+  async function list(params, filter) {
+    const estado = enumFilter(params.estado, Object.keys(transicionesReserva), "Estado de reserva");
+    if (estado) filter.estado = estado;
+    const q = searchText(params.q);
+    if (q) filter.folio = literal(q);
+    return listResult(params, Reserva, filter, Reserva.find(filter)
       .select("-conceptos -pagos -condiciones -observaciones -clienteDocumento.correo -clienteDocumento.telefono")
-      .sort({ createdAt: -1, _id: -1 }).lean();
-    return rows.map(reservaJson);
+      .sort({ createdAt: -1, _id: -1 }).lean(), reservaJson);
   }
 
   app.get(path, async (req, res) => {
-    const filter = scope(req);
-    if (req.query.estado !== undefined) {
-      if (typeof req.query.estado !== "string" || !Object.hasOwn(transicionesReserva, req.query.estado))
-        throw fail(400, "Estado de reserva inválido.");
-      filter.estado = req.query.estado;
-    }
-    res.json(await list(filter));
+    res.json(await list(req.query, scope(req)));
   });
 
   app.get("/api/clientes/:id/reservas", validId, async (req, res) => {
     const filter = scope(req);
     if (!await Cliente.exists({ _id: req.params.id, ...filter }))
       throw fail(404, "Contacto no encontrado.");
-    res.json(await list({ ...filter, cliente: req.params.id }));
+    res.json(await list(req.query, { ...filter, cliente: req.params.id }));
   });
 
   app.get("/api/cotizaciones/:id/reserva", validId, async (req, res) => {

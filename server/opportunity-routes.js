@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { etapas, etapasCerradas, estados } from "../shared/oportunidades.js";
 import { Cliente } from "./models.js";
 import { Oportunidad } from "./opportunity-model.js";
+import { enumFilter, listResult } from "./list-queries.js";
 
 function withNames(query) {
   return query
@@ -44,7 +45,20 @@ export function registerOpportunityRoutes(app, { scope, fail, validId, admin }) 
   const list = (filter) => withNames(Oportunidad.find(filter).sort({ createdAt: -1, _id: -1 }));
 
   app.get(path, async (req, res) => {
-    res.json((await list(scope(req))).map(opportunityJson));
+    const filter = scope(req);
+    const { asesor } = req.query;
+    if (asesor !== undefined) {
+      if (req.usuario.rol !== "Administrador") throw fail(403, "Filtro exclusivo para administradores.");
+      filter.asesor = objectId(asesor, "asesor");
+    }
+    const estado = enumFilter(req.query.estado, estados, "Estado de oportunidad");
+    const etapa = enumFilter(req.query.etapa, etapas, "Etapa de oportunidad");
+    if (estado) filter.etapa = estado === "Abierta" ? { $in: etapas.slice(0, -2) } : estado;
+    if (etapa) {
+      if (estado) filter.$and = [{ etapa }];
+      else filter.etapa = etapa;
+    }
+    res.json(await listResult(req.query, Oportunidad, filter, list(filter), opportunityJson));
   });
 
   app.get(path + "/embudo", admin, async (req, res) => {

@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { Link, useParams } from "react-router";
+import { useApiData } from "../../services/useApiData";
+import { filterOptions, useFilteredList } from "../../services/useFilteredList";
+import ListFilters, { Pagination } from "../../components/ListFilters";
+import FichaCliente from "./FichaCliente";
 import "./Clientes.css";
 import { api } from "../../services/api";
 import ConfirmDialog from "../../components/ConfirmDialog";
@@ -16,61 +20,20 @@ const formularioInicial = {
   presupuesto: "",
 };
 
-function Clientes() {
-  const [clientes, setClientes] = useState([]);
-  const [busqueda, setBusqueda] = useState("");
+function GestionClientes({ id }) {
+  const [revision, setRevision] = useState(0);
+  const listado = useFilteredList(id ? null : "/clientes", ["q", "estado"], revision);
+  const ficha = useApiData(id ? "/clientes/" + id + "/ficha" : null, revision);
+  const clientes = listado.data?.items ?? [];
+  const resumen = listado.data?.resumen;
+  const recurso = id ? ficha : listado;
+  const cargando = !recurso.data && !recurso.error;
   const [clienteAEliminar, setClienteAEliminar] = useState(null);
-  const [filtro, setFiltro] = useState("Todos");
   const [formulario, setFormulario] = useState(formularioInicial);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [error, setError] = useState("");
-  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    api("/clientes")
-      .then((data) => {
-        if (active) setClientes(data);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setCargando(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const clientesFiltrados = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase();
-
-    return clientes.filter((cliente) => {
-      const coincideBusqueda = [
-        cliente.nombre,
-        cliente.correo,
-        cliente.telefono,
-      ].some((valor) =>
-        String(valor || "")
-          .toLowerCase()
-          .includes(termino),
-      );
-
-      const coincideEstado = filtro === "Todos" || cliente.estado === filtro;
-
-      return coincideBusqueda && coincideEstado;
-    });
-  }, [clientes, busqueda, filtro]);
-
-  const resumen = {
-    total: clientes.length,
-    prospectos: clientes.filter((c) => c.estado === "Prospecto").length,
-    activos: clientes.filter((c) => c.estado === "Activo").length,
-    inactivos: clientes.filter((c) => c.estado === "Inactivo").length,
-  };
 
   function actualizarCampo(evento) {
     const { name, value } = evento.target;
@@ -126,8 +89,8 @@ function Clientes() {
     }
 
     const telefonoNormalizado = telefono.replace(/\D/g, "");
-    if (telefonoNormalizado.length < 10) {
-      setError("Introduce un teléfono de al menos 10 dígitos.");
+    if (telefonoNormalizado.length < 10 || telefonoNormalizado.length > 15) {
+      setError("Introduce un teléfono de entre 10 y 15 dígitos.");
       return;
     }
 
@@ -162,15 +125,11 @@ function Clientes() {
 
     setGuardando(true);
     try {
-      const saved = await api(
+      await api(
         "/clientes" + (editandoId ? "/" + editandoId : ""),
         { method: editandoId ? "PUT" : "POST", body: datos },
       );
-      setClientes((prev) =>
-        editandoId
-          ? prev.map((c) => (c.id === editandoId ? saved : c))
-          : [saved, ...prev],
-      );
+      setRevision((prev) => prev + 1);
       cerrarFormulario();
     } catch (err) {
       setError(err.message);
@@ -188,7 +147,7 @@ function Clientes() {
     setGuardando(true);
     try {
       await api("/clientes/" + clienteAEliminar.id, { method: "DELETE" });
-      setClientes((prev) => prev.filter((c) => c.id !== clienteAEliminar.id));
+      setRevision((prev) => prev + 1);
       setClienteAEliminar(null);
     } catch (err) {
       setError(err.message);
@@ -202,128 +161,109 @@ function Clientes() {
     <div className="clientes-page">
       {cargando && <p role="status">Cargando contactos...</p>}
       {error && !mostrarFormulario && <p role="alert">{error}</p>}
-      <div className="clientes-encabezado">
-        <div>
-          <h2>Clientes y prospectos</h2>
-          <p>
-            Administra los contactos y oportunidades comerciales de la agencia.
-          </p>
-        </div>
+      {recurso.error && <p role="alert">{recurso.error}</p>}
+      {id ? (
+        ficha.data && <FichaCliente ficha={ficha.data} onEdit={editarCliente} busy={guardando} />
+      ) : (
+        <>
+          <div className="clientes-encabezado">
+            <div>
+              <h2>Clientes y prospectos</h2>
+              <p>
+                Administra los contactos y oportunidades comerciales de la agencia.
+              </p>
+            </div>
 
-        <button
-          className="btn-primary"
-          disabled={cargando || guardando}
-          onClick={nuevoCliente}
-        >
-          + Nuevo contacto
-        </button>
-      </div>
+            <button
+              className="btn-primary"
+              disabled={cargando || guardando}
+              onClick={nuevoCliente}
+            >
+              + Nuevo contacto
+            </button>
+          </div>
 
-      <div className="clientes-resumen">
-        <div className="resumen-card">
-          <span>Total de contactos</span>
-          <strong>{resumen.total}</strong>
-        </div>
-        <div className="resumen-card">
-          <span>Prospectos</span>
-          <strong>{resumen.prospectos}</strong>
-        </div>
-        <div className="resumen-card">
-          <span>Clientes activos</span>
-          <strong>{resumen.activos}</strong>
-        </div>
-        <div className="resumen-card">
-          <span>Clientes inactivos</span>
-          <strong>{resumen.inactivos}</strong>
-        </div>
-      </div>
-
-      <section className="clientes-panel">
-        <div className="clientes-filtros">
-          <input
-            type="search"
-            placeholder="Buscar nombre, correo o teléfono..."
-            aria-label="Buscar contactos"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-
-          <select
-            aria-label="Filtrar por estado"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          >
-            <option value="Todos">Todos los estados</option>
-            <option value="Prospecto">Prospectos</option>
-            <option value="Activo">Clientes activos</option>
-            <option value="Inactivo">Clientes inactivos</option>
-          </select>
-        </div>
-
-        <div className="tabla-contenedor">
-          <table className="tabla-clientes">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Contacto</th>
-                <th>Estado</th>
-                <th>Origen</th>
-                <th>Destino de interés</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {clientesFiltrados.map((cliente) => (
-                <tr key={cliente.id}>
-                  <td>
-                    <strong>{cliente.nombre}</strong>
-                    <small>{cliente.ubicacion || "Sin ubicación"}</small>
-                  </td>
-                  <td>
-                    {cliente.correo}
-                    <small>{cliente.telefono}</small>
-                  </td>
-                  <td>
-                    <span
-                      className={`estado-cliente ${cliente.estado.toLowerCase()}`}
-                    >
-                      {cliente.estado}
-                    </span>
-                  </td>
-                  <td>{cliente.origen}</td>
-                  <td>{cliente.destinoInteres || "—"}</td>
-                  <td>
-                    <div className="acciones-cliente">
-                      <Link to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
-                      <button onClick={() => editarCliente(cliente)}>
-                        Editar
-                      </button>
-                      <button
-                        className="btn-eliminar"
-                        onClick={() => eliminarCliente(cliente)}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+          {resumen && (
+            <div className="clientes-resumen">
+              {[
+                ["Total de contactos", Object.values(resumen).reduce((sum, count) => sum + count, 0)],
+                ["Prospectos", resumen.Prospecto ?? 0],
+                ["Clientes activos", resumen.Activo ?? 0],
+                ["Clientes inactivos", resumen.Inactivo ?? 0],
+              ].map(([label, count]) => (
+                <div className="resumen-card" key={label}><span>{label}</span><strong>{count}</strong></div>
               ))}
-            </tbody>
-          </table>
-
-          {clientesFiltrados.length === 0 && (
-            <div className="clientes-vacio">
-              <p>No se encontraron contactos.</p>
-              <span>Registra uno nuevo o modifica los filtros.</span>
             </div>
           )}
-        </div>
+          <section className="clientes-panel">
+            <ListFilters list={listado} searchLabel="Nombre, correo o teléfono" selects={[
+              { name: "estado", label: "Estado", options: filterOptions(["Prospecto", "Activo", "Inactivo"]) },
+            ]} />
 
-        <div className="clientes-pie">
-          Mostrando {clientesFiltrados.length} de {clientes.length} contactos
-        </div>
-      </section>
+            <div className="tabla-contenedor">
+              <table className="tabla-clientes">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Estado</th>
+                    <th>Origen</th>
+                    <th>Destino de interés</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {clientes.map((cliente) => (
+                    <tr key={cliente.id}>
+                      <td>
+                        <Link to={"/clientes/" + cliente.id}><strong>{cliente.nombre}</strong></Link>
+                        <small>{cliente.ubicacion || "Sin ubicación"}</small>
+                      </td>
+                      <td>
+                        {cliente.correo}
+                        <small>{cliente.telefono}</small>
+                      </td>
+                      <td>
+                        <span
+                          className={`estado-cliente ${cliente.estado.toLowerCase()}`}
+                        >
+                          {cliente.estado}
+                        </span>
+                      </td>
+                      <td>{cliente.origen}</td>
+                      <td>{cliente.destinoInteres || "—"}</td>
+                      <td>
+                        <div className="acciones-cliente">
+                          <Link to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
+                          <button onClick={() => editarCliente(cliente)}>
+                            Editar
+                          </button>
+                          <button
+                            className="btn-eliminar"
+                            onClick={() => eliminarCliente(cliente)}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {listado.data && clientes.length === 0 && (
+                <div className="clientes-vacio">
+                  <p>No se encontraron contactos.</p>
+                  <span>Registra uno nuevo o modifica los filtros.</span>
+                </div>
+              )}
+            </div>
+
+            <Pagination list={listado} />
+          </section>
+        </>
+      )}
 
       {mostrarFormulario && (
         <div className="modal-overlay">
@@ -500,4 +440,7 @@ function Clientes() {
   );
 }
 
-export default Clientes;
+export default function Clientes() {
+  const { id } = useParams();
+  return <GestionClientes key={id ?? "lista"} id={id} />;
+}

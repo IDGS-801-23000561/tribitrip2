@@ -9,6 +9,8 @@ import { registerTravelRoutes } from "./travel-routes.js";
 import { registerOpportunityRoutes } from "./opportunity-routes.js";
 import { registerQuoteRoutes } from "./quote-routes.js";
 import { registerReservationRoutes } from "./reservation-routes.js";
+import { enumFilter, listResult, literal, searchText } from "./list-queries.js";
+import { registerCommercialRoutes } from "./commercial-routes.js";
 import {
   hashPassword,
   verifyPassword,
@@ -164,11 +166,8 @@ function clientData(body) {
     if (body[key] !== undefined) data[key] = body[key].trim();
   }
   if (data.telefono) data.telefono = data.telefono.replace(/\D/g, "");
-  if (
-    body.presupuesto === "" ||
-    body.presupuesto === null ||
-    body.presupuesto === undefined
-  )
+  if (body.presupuesto === undefined) return data;
+  if (body.presupuesto === "" || body.presupuesto === null)
     data.presupuesto = null;
   else {
     if (
@@ -181,11 +180,27 @@ function clientData(body) {
   }
   return data;
 }
-app.get("/api/clientes", async (req, res) =>
-  res.json(
-    (await Cliente.find(scope(req)).sort({ createdAt: -1 })).map(clientJson),
-  ),
-);
+app.get("/api/clientes", async (req, res) => {
+  const filter = scope(req);
+  const estado = enumFilter(req.query.estado, ["Prospecto", "Activo", "Inactivo"], "Estado de cliente");
+  if (estado) filter.estado = estado;
+  const q = searchText(req.query.q);
+  if (q) {
+    const term = literal(q);
+    filter.$or = [{ nombre: term }, { correo: term }];
+    if (/^[+()\d.\s-]+$/.test(q) && /\d/.test(q))
+      filter.$or.push({ telefono: literal(q.replace(/\D/g, "")) });
+  }
+  const page = await listResult(req.query, Cliente, filter,
+    Cliente.find(filter).sort({ createdAt: -1, _id: -1 }), clientJson);
+  if (Array.isArray(page)) return res.json(page);
+  const counts = await Cliente.aggregate([
+    { $match: scope(req) },
+    { $group: { _id: "$estado", cantidad: { $sum: 1 } } },
+  ]);
+  const resumen = Object.fromEntries(counts.map(({ _id, cantidad }) => [_id, cantidad]));
+  return res.json({ ...page, resumen });
+});
 app.get("/api/clientes/:id", validId, async (req, res) => {
   const cliente = await Cliente.findOne({ _id: req.params.id, ...scope(req) });
   if (!cliente) throw fail(404, "Contacto no encontrado.");
@@ -199,10 +214,25 @@ app.post("/api/clientes", async (req, res) => {
   res.status(201).json(clientJson(cliente));
 });
 app.put("/api/clientes/:id", validId, async (req, res) => {
-  const cliente = await Cliente.findOne({ _id: req.params.id, ...scope(req) });
-  if (!cliente) throw fail(404, "Contacto no encontrado.");
-  Object.assign(cliente, clientData(req.body || {}));
-  await cliente.save();
+  const body = req.body || {};
+  const { revisionContacto } = body;
+  const filter = { _id: req.params.id, ...scope(req) };
+  const match = { ...filter };
+  if (revisionContacto !== undefined) {
+    if (!Number.isSafeInteger(revisionContacto) || revisionContacto < 0)
+      throw fail(400, "Revisión de contacto inválida.");
+    if (revisionContacto === 0)
+      match.$or = [{ revisionContacto: 0 }, { revisionContacto: { $exists: false } }];
+    else match.revisionContacto = revisionContacto;
+  }
+  const cliente = await Cliente.findOneAndUpdate(match,
+    { $set: clientData(body), $inc: { revisionContacto: 1 } },
+    { new: true, runValidators: true });
+  if (!cliente) {
+    if (revisionContacto !== undefined && await Cliente.exists(filter))
+      throw fail(409, "El contacto cambió. Vuelve a abrir su ficha antes de editar.");
+    throw fail(404, "Contacto no encontrado.");
+  }
   res.json(clientJson(cliente));
 });
 app.delete("/api/clientes/:id", validId, async (req, res) => {
@@ -221,6 +251,7 @@ registerTravelRoutes(app, { scope, fail, validId });
 registerOpportunityRoutes(app, { scope, fail, validId, admin });
 registerQuoteRoutes(app, { scope, fail, validId });
 registerReservationRoutes(app, { scope, fail, validId });
+registerCommercialRoutes(app, { scope, fail, validId, admin, clientJson });
 app.use("/api", (req, res) =>
   res.status(404).json({ mensaje: "Ruta no encontrada." }),
 );

@@ -49,6 +49,7 @@ const clientSchema = new Schema(
     contactoPreferido: { type: String, maxlength: 100, default: "WhatsApp" },
     destinoInteres: { type: String, maxlength: 200, default: "" },
     presupuesto: { type: Number, min: 0, default: null },
+    revisionContacto: { type: Number, default: 0 },
     solicitudes: { type: [travelRequestSchema], select: false },
     asesor: {
       type: Schema.Types.ObjectId,
@@ -60,6 +61,8 @@ const clientSchema = new Schema(
   { timestamps: true },
 );
 clientSchema.index({ "solicitudes._id": 1 }, { sparse: true });
+clientSchema.index({ "solicitudes.createdAt": 1 });
+clientSchema.index({ asesor: 1, createdAt: -1, _id: -1 });
 export const Usuario = mongoose.model("Usuario", userSchema);
 export const Sesion = mongoose.model("Sesion", sessionSchema);
 export const Cliente = mongoose.model("Cliente", clientSchema);

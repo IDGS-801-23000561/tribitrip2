@@ -47,6 +47,12 @@ const secciones = [
     nombre: "Reservas",
     icono: CalendarCheck,
   },
+  {
+    ruta: "/reportes",
+    nombre: "Reportes comerciales",
+    icono: ChartNoAxesCombined,
+    admin: true,
+  },
 ];
 
 function Sidebar() {

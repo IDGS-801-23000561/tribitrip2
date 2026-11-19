@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router";
-import { useApiData } from "../../services/useApiData";
+import ListFilters, { Pagination } from "../../components/ListFilters";
+import { filterOptions, useFilteredList } from "../../services/useFilteredList";
 import { mostrarImporte } from "./importes";
 
 export default function Cotizaciones() {
@@ -8,7 +9,9 @@ export default function Cotizaciones() {
   const path = oportunidad
     ? "/oportunidades/" + encodeURIComponent(oportunidad) + "/cotizaciones"
     : "/cotizaciones";
-  const { data, error } = useApiData(path);
+  const list = useFilteredList(path, ["q", "estado"]);
+  const { error } = list;
+  const data = list.data?.items;
   return (
     <section className="panel">
       <h2>{oportunidad ? "Cotizaciones de la oportunidad" : "Cotizaciones registradas"}</h2>
@@ -17,9 +20,12 @@ export default function Cotizaciones() {
         <Link to="catalogo">Catálogo de servicios</Link>
         {oportunidad && <Link to="/cotizaciones">Ver todas</Link>}
       </div>
+      <ListFilters list={list} searchLabel="Folio de cotización" selects={[
+        { name: "estado", label: "Estado", options: filterOptions(["Borrador", "Enviada", "Aceptada", "Rechazada", "Vencida"]) },
+      ]} />
       {error && <p role="alert">{error}</p>}
       {!data && !error && <p role="status">Cargando cotizaciones…</p>}
-      {data?.length === 0 && <p>No hay cotizaciones registradas.</p>}
+      {data?.length === 0 && <p>No hay cotizaciones para estos filtros.</p>}
       {data?.length > 0 && (
         <div className="tabla-contenedor">
           <table className="tabla-clientes">
@@ -37,6 +43,7 @@ export default function Cotizaciones() {
           </table>
         </div>
       )}
+      <Pagination list={list} />
     </section>
   );
 }

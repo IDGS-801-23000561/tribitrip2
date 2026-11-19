@@ -4,7 +4,8 @@ import { Cliente } from "./models.js";
 import { Oportunidad } from "./opportunity-model.js";
 import { Cotizacion, ServicioTuristico } from "./quote-models.js";
 import { isCalendarDate } from "./travel-models.js";
-import { datosCliente, estadosCotizacion, estadoVigente, transicionesDisponibles, versionActual } from "./quote-lifecycle.js";
+import { datosCliente, estadosCotizacion, estadoVigente, fechaCiudadMexico, transicionesDisponibles, versionActual } from "./quote-lifecycle.js";
+import { enumFilter, listResult, literal, searchText } from "./list-queries.js";
 import { quoteDocument } from "./quote-document.js";
 
 const asJson = ({ _id, ...data }) => ({ id: String(_id), ...data });
@@ -93,11 +94,22 @@ export function registerQuoteRoutes(app, { scope, fail, validId }) {
     };
   }
 
-  async function listQuotes(filter) {
-    const rows = await quoteQuery(Cotizacion.find(filter)
+  async function listQuotes(params, filter) {
+    const q = searchText(params.q);
+    if (q) filter.folio = literal(q);
+    const estado = enumFilter(params.estado, estadosCotizacion, "Estado de cotización");
+    const today = fechaCiudadMexico();
+    const draft = { $or: [{ estado: "Borrador" }, { estado: null }] };
+    if (estado === "Vencida") filter.$or = [
+      { estado: "Vencida" },
+      { vigencia: { $lt: today }, $or: [{ estado: "Enviada" }, ...draft.$or] },
+    ];
+    else if (estado === "Borrador") Object.assign(filter, draft, { vigencia: { $gte: today } });
+    else if (estado === "Enviada") Object.assign(filter, { estado, vigencia: { $gte: today } });
+    else if (estado) filter.estado = estado;
+    return listResult(params, Cotizacion, filter, quoteQuery(Cotizacion.find(filter)
       .select("-conceptos -condiciones -observaciones -historial -clienteDocumento")
-      .sort({ createdAt: -1, _id: -1 }));
-    return rows.map(quoteJson);
+      .sort({ createdAt: -1, _id: -1 })), quoteJson);
   }
 
   async function editableQuote(req) {
@@ -155,12 +167,12 @@ export function registerQuoteRoutes(app, { scope, fail, validId }) {
     res.json(asJson(servicio));
   });
 
-  app.get(path, async (req, res) => res.json(await listQuotes(scope(req))));
+  app.get(path, async (req, res) => res.json(await listQuotes(req.query, scope(req))));
   app.get("/api/oportunidades/:id/cotizaciones", validId, async (req, res) => {
     const filter = scope(req);
     if (!await Oportunidad.exists({ _id: req.params.id, ...filter }))
       throw fail(404, "Oportunidad no encontrada.");
-    res.json(await listQuotes({ ...filter, oportunidad: req.params.id }));
+    res.json(await listQuotes(req.query, { ...filter, oportunidad: req.params.id }));
   });
 
   app.get(path + "/:id", validId, async (req, res) => {

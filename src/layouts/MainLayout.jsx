@@ -11,7 +11,7 @@ const titulos = {
   "/oportunidades/embudo": "Embudo de ventas",
   "/cotizaciones": "Cotizaciones",
   "/reservas": "Reservas",
-  "/actividades": "Seguimiento de actividades",
+  "/reportes": "Reportes comerciales",
 };
 
 function MainLayout() {

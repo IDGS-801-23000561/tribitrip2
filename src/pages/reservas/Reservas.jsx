@@ -1,5 +1,7 @@
 import { Link, useSearchParams } from "react-router";
 import { useApiData } from "../../services/useApiData";
+import ListFilters, { Pagination } from "../../components/ListFilters";
+import { filterOptions, useFilteredList } from "../../services/useFilteredList";
 import { mostrarImporte } from "../cotizaciones/importes";
 
 export default function Reservas() {
@@ -7,7 +9,9 @@ export default function Reservas() {
   const cliente = params.get("cliente");
   const clientPath = cliente ? "/clientes/" + encodeURIComponent(cliente) : null;
   const { data: contacto } = useApiData(clientPath);
-  const { data, error } = useApiData(clientPath ? clientPath + "/reservas" : "/reservas");
+  const list = useFilteredList(clientPath ? clientPath + "/reservas" : "/reservas", ["q", "estado"]);
+  const { error } = list;
+  const data = list.data?.items;
 
   return (
     <section className="panel">
@@ -17,9 +21,12 @@ export default function Reservas() {
         <Link to="nueva">Nueva reserva</Link>
         {cliente && <Link to="/clientes">Volver a clientes</Link>}
       </div>
+      <ListFilters list={list} searchLabel="Folio de reserva" selects={[
+        { name: "estado", label: "Estado", options: filterOptions(["Pendiente de pago", "Confirmada", "En viaje", "Completada", "Cancelada"]) },
+      ]} />
       {error && <p role="alert">{error}</p>}
       {!data && !error && <p role="status">Cargando reservas…</p>}
-      {data?.length === 0 && <p>No hay reservas registradas.</p>}
+      {data?.length === 0 && <p>No hay reservas para estos filtros.</p>}
       {data?.length > 0 && (
         <div className="tabla-contenedor">
           <table className="tabla-clientes">
@@ -37,6 +44,7 @@ export default function Reservas() {
           </table>
         </div>
       )}
+      <Pagination list={list} />
     </section>
   );
 }

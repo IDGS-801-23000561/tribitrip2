@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes } from "react-router";
 import MainLayout from "../layouts/MainLayout";
 import Dashboard from "../pages/dashboard/Dashboard";
+import Reportes from "../pages/dashboard/Reportes";
 import Clientes from "../pages/clientes/Clientes";
 import Login from "../pages/Login";
 import Usuarios from "../pages/Usuarios";
@@ -40,9 +41,11 @@ export default function AppRoutes() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="clientes" element={<Clientes />} />
+          <Route path="clientes/:id" element={<Clientes />} />
           <Route element={<AdminRoute />}>
             <Route path="usuarios" element={<Usuarios />} />
             <Route path="oportunidades/embudo" element={<Embudo />} />
+            <Route path="reportes" element={<Reportes />} />
           </Route>
           <Route path="solicitudes" element={<Solicitudes />} />
           <Route path="solicitudes/:id" element={<SolicitudDetalle />} />
