@@ -51,6 +51,16 @@ En el detalle, usa **Ver documento imprimible** o abre una versión anterior. **
 
 Para verificar en un entorno MongoDB aislado, recorre el alta y el versionado, comprueba el acceso con dos asesores y un administrador y abre los documentos de ambas versiones. Valida la impresión en navegador con cotizaciones de una y muchas líneas, el rechazo tras expirar, el bloqueo tras aceptar y los conflictos de edición y aceptación simultáneas. Confirma que el índice único parcial esté creado y que cambiar el catálogo no afecte los importes históricos.
 
+## Reservas y pagos informativos
+
+Desde **Reservas → Nueva reserva**, o desde una cotización aceptada, selecciona la cotización y registra la reserva interna. La oportunidad debe estar en etapa Ganada y debe pertenecer al mismo cliente y asesor. Puedes capturar un localizador externo y un proveedor de referencia manualmente. El CRM copia las fechas de la solicitud y los servicios e importes de la versión aceptada. Si ya se reservó esa cotización, abre la reserva existente. En **Clientes y prospectos**, la acción **Historial de reservas** muestra las reservas de ese contacto.
+
+Una reserva empieza como **Pendiente de pago**. Puede pasar a Confirmada o Cancelada. Una Confirmada puede pasar a En viaje o Cancelada. En viaje solo pasa a Completada. Completada y Cancelada son terminales. La confirmación es un estado interno y puede registrarse con saldo pendiente.
+
+En el detalle, **Registrar pago informativo** captura fecha, monto, método, referencia y observaciones. El servidor calcula el total reportado y resta ese monto del importe acordado. Se rechazan fechas futuras, sobrepagos y duplicados por método y referencia dentro de la reserva. Las reservas canceladas conservan su historial y dejan de recibir pagos. Las completadas admiten registros posteriores de pagos reportados. El historial se agrega sin edición, anulación o reembolso desde esta versión.
+
+Para verificar con MongoDB en un entorno aislado, registra desde una cotización aceptada de oportunidad ganada y comprueba el historial del cliente, los estados, los índices únicos y la visibilidad con dos asesores. Repite el alta simultáneamente y comprueba que ambas respuestas señalen la misma reserva. Registra pagos concurrentes con un saldo insuficiente para ambos y verifica que la suma nunca exceda el importe acordado. Recarga el detalle en navegador y confirma que los datos históricos se conservan.
+
 ## Verificación
 npm.cmd run lint
 npm.cmd run build

@@ -3,10 +3,11 @@ export const estadosCotizacion = ["Borrador", "Enviada", "Aceptada", "Rechazada"
 const businessDate = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Mexico_City", year: "numeric", month: "2-digit", day: "2-digit",
 });
+export const fechaCiudadMexico = (now = new Date()) => businessDate.format(now);
 
 export function estadoVigente(cotizacion, now = new Date()) {
   const estado = cotizacion.estado ?? "Borrador";
-  if (["Borrador", "Enviada"].includes(estado) && cotizacion.vigencia < businessDate.format(now))
+  if (["Borrador", "Enviada"].includes(estado) && cotizacion.vigencia < fechaCiudadMexico(now))
     return "Vencida";
   return estado;
 }

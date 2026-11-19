@@ -2,9 +2,9 @@
 
 ## 1. Resumen ejecutivo del estado actual
 
-TribiTrip es un CRM para una agencia de viajes. El repositorio contiene los flujos de autenticación por correo, administración de usuarios, gestión de clientes y prospectos, solicitudes de viaje, viajeros asociados, oportunidades comerciales, embudo de ventas, catálogo de servicios, cotizaciones con historial y documentos imprimibles. El frontend y la API están conectados en el código para estos flujos. Su operación con datos persistentes y en navegador queda **NO VERIFICADA** en esta auditoría.
+TribiTrip es un CRM para una agencia de viajes. El repositorio contiene los flujos de autenticación por correo, administración de usuarios, gestión de clientes y prospectos, solicitudes de viaje, viajeros asociados, oportunidades comerciales, embudo de ventas, catálogo de servicios, cotizaciones con historial y documentos imprimibles, reservas y pagos informativos. El frontend y la API están conectados en el código para estos flujos. Su operación con datos persistentes y en navegador queda **NO VERIFICADA** en esta auditoría.
 
-El MVP usa exclusivamente MongoDB y comprende seis épicas (F01, F02, F03, F04, F06 y F07) y 17 historias. F05, HU-013 y HU-014 están fuera del alcance. La evaluación arroja **0 COMPLETADAS, 3 PARCIALES, 3 PENDIENTES y 11 NO VERIFICADAS**. Pasaron ESLint, el build de Vite y trece pruebas de servidor sin conexión a MongoDB. Reservas conserva un marcador de navegación. El panel principal presenta tarjetas estáticas.
+El MVP usa exclusivamente MongoDB y comprende seis épicas (F01, F02, F03, F04, F06 y F07) y 17 historias. F05, HU-013 y HU-014 están fuera del alcance. La evaluación arroja **0 COMPLETADAS, 3 PARCIALES, 1 PENDIENTE y 13 NO VERIFICADAS**. Pasaron ESLint, el build de Vite y quince pruebas de servidor sin conexión a MongoDB. El panel principal presenta tarjetas estáticas.
 
 Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuente de criterios, [informacion tribitrip.txt](<informacion tribitrip.txt>) como contexto de requisitos, [cronograma tribitrip.txt](<cronograma tribitrip.txt>) como planificación y [DESARROLLO.md](DESARROLLO.md) como guía técnica. El código determina la implementación observada. Las referencias históricas a una base relacional y a actividades excluidas quedan subordinadas al alcance vigente. [README.md](README.md) conserva el contenido de plantilla de Vite.
 
@@ -12,7 +12,7 @@ Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuent
 
 - **Cliente.** SPA en JavaScript y JSX con React 19, React Router 8, Vite 8 y Lucide React. Usa contexto para sesión, estado local para formularios y filtros, Fetch para la API y CSS global y por vista con reglas responsivas. Su comportamiento visual queda sin prueba en navegador.
 - **Servidor.** Node.js con módulos ES, Express 5, Helmet, cookie-parser y express-rate-limit. `app.js` define rutas y reúne middleware, validación, lógica de negocio y acceso a modelos. No hay directorios independientes de controladores, servicios o repositorios. `index.js` separa el arranque de la aplicación HTTP para facilitar pruebas.
-- **Persistencia.** MongoDB con Mongoose 9 y seis modelos de colección (`Usuario`, `Sesion`, `Cliente`, `Oportunidad`, `ServicioTuristico`, `Cotizacion`). Los esquemas de solicitud y viajero se alojan como subdocumentos de cliente. El destino y presupuesto del contacto son preferencias del contacto.
+- **Persistencia.** MongoDB con Mongoose 9 y siete modelos de colección (`Usuario`, `Sesion`, `Cliente`, `Oportunidad`, `ServicioTuristico`, `Cotizacion`, `Reserva`). Los esquemas de solicitud y viajero se alojan como subdocumentos de cliente. El destino y presupuesto del contacto son preferencias del contacto.
 - **Herramientas.** ESLint 10 con reglas JS, React Hooks y React Refresh, y pruebas nativas con `node:test`. Los manifiestos de raíz y servidor declaran dependencias independientes. Hay lockfiles locales de ambos paquetes, ignorados por Git.
 
 ## 3. Estructura de carpetas y archivos importantes
@@ -30,6 +30,7 @@ Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuent
 | [server/travel-models.js](server/travel-models.js), [server/travel-routes.js](server/travel-routes.js), [server/travel.test.js](server/travel.test.js), [src/pages/solicitudes/](src/pages/solicitudes/) | Esquemas de viaje, rutas protegidas, pruebas sin MongoDB y componentes de listado, formulario, detalle y viajeros. |
 | [server/opportunity-model.js](server/opportunity-model.js), [server/opportunity-routes.js](server/opportunity-routes.js), [server/opportunity.test.js](server/opportunity.test.js), [src/pages/oportunidades/](src/pages/oportunidades/), [shared/oportunidades.js](shared/oportunidades.js) | Modelo de oportunidad, API, pruebas, listado, detalle, embudo y etapas compartidas. |
 | [server/quote-models.js](server/quote-models.js), [server/quote-routes.js](server/quote-routes.js), [server/quote.test.js](server/quote.test.js), [src/pages/cotizaciones/](src/pages/cotizaciones/), [shared/cotizaciones.js](shared/cotizaciones.js) | Catálogo, cotizaciones, pruebas HTTP, pantallas y cálculo monetario compartido. |
+| [server/reservation-model.js](server/reservation-model.js), [server/reservation-routes.js](server/reservation-routes.js), [server/reservation.test.js](server/reservation.test.js), [src/pages/reservas/](src/pages/reservas/) | Reservas internas, pagos embebidos, endpoints protegidos, pruebas y vistas de listado, alta, detalle e historial. |
 | [server/seed.js](server/seed.js) | Alta inicial del administrador. Revisado en código, sin ejecución. |
 | [server/app.test.js](server/app.test.js), [server/security.test.js](server/security.test.js) | Pruebas HTTP, validación de modelos y criptografía. |
 | [package.json](package.json), [server/package.json](server/package.json), [vite.config.js](vite.config.js), [eslint.config.js](eslint.config.js), [azure-pipelines.yml](azure-pipelines.yml) | Scripts, dependencias, proxy, lint y definición de CI. |
@@ -49,7 +50,8 @@ Se revisaron [actividades tribitrip.txt](<actividades tribitrip.txt>) como fuent
 | Catálogo | Consulta y búsqueda de servicios y paquetes por nombre o destino, detalle y selección para cotizar. |
 | Cotizaciones | Alta, detalle, listado general o por oportunidad y edición con folio, vigencia, términos, conceptos y totales calculados. |
 | Estados y documentos | Transiciones de cotización, aceptación vinculada a una versión, historial y documento imprimible por versión. |
-| Navegación | Layout privado y menú de módulos. La ruta de reservas muestra un aviso genérico. |
+| Reservas y pagos informativos | Alta desde cotización aceptada, historial por cliente, estados, registro de pagos y saldo calculado por la API. |
+| Navegación | Layout privado y menú de módulos. |
 
 Los únicos comportamientos comprobados por ejecución se enumeran en la sección 9.
 
@@ -71,8 +73,8 @@ Los únicos comportamientos comprobados por ejecución se enumeran en la secció
 | HU-010 | Generar cotizaciones personalizadas | NO VERIFICADA | Alta, consulta, listado por oportunidad, edición, folio único, vínculos, conceptos múltiples, condiciones, observaciones, vigencia y cálculo en centavos. | Verificar persistencia, índice único, concurrencia y uso en navegador. | `server/quote-models.js`, `server/quote-routes.js`, `shared/cotizaciones.js`, `src/pages/cotizaciones/` | Pasan pruebas de cálculo, modelo y HTTP con persistencia simulada, incluidos folios simultáneos, permisos y snapshots. | Impuestos y cargos opcionales de RF-06 como importes fijos. |
 | HU-011 | Administrar cotizaciones y sus estados | NO VERIFICADA | Estados, transiciones con vigencia, historial numerado, consulta por versión y aceptación exclusiva por oportunidad. | Verificar índice, operaciones concurrentes y controles en navegador. | `server/quote-models.js`, `server/quote-lifecycle.js`, `server/quote-routes.js`, `src/pages/cotizaciones/CotizacionDetalle.jsx` | Pasan pruebas de transiciones, vigencia, permisos, persistencia simulada de versiones y conflicto. | Una cotización aceptada bloquea el folio y fija su versión. |
 | HU-012 | Generar documento de cotización | NO VERIFICADA | HTML imprimible de la versión elegida, con datos de agencia y cliente, conceptos, términos e importes persistidos. El navegador permite imprimir o guardar como PDF. | Verificar representación y paginación real en navegador con MongoDB. | `server/quote-document.js`, `server/quote-routes.js`, `src/pages/cotizaciones/CotizacionDocumento.jsx`, `src/pages/cotizaciones/documento.css` | Pasan pruebas del contenido de versiones y de la plantilla HTML con 1 y 50 conceptos. | La impresión y el PDF dependen del navegador. |
-| HU-015 | Registrar reservas de clientes | PENDIENTE | Ruta placeholder. | Reserva interna desde cotización aceptada, datos de cliente, servicios, fechas e importes, folio, consulta, cambios de estado e historial en ficha. | `src/routes/AppRoutes.jsx` (ruta) | Sin pruebas. | El registro es interno. |
-| HU-016 | Registrar pagos informativos | PENDIENTE | — | Fecha, monto, método, referencia, vínculo con reserva, historial, total registrado y saldo. | — | Sin pruebas. | Alcance informativo, sin cargos bancarios ni procesamiento electrónico. |
+| HU-015 | Registrar reservas de clientes | NO VERIFICADA | Alta interna desde cotización aceptada y oportunidad ganada, folio, datos comerciales y fechas, estados, detalle e historial por cliente. | Verificar índices, persistencia y flujo en navegador. | `server/reservation-model.js`, `server/reservation-routes.js`, `src/pages/reservas/`, `src/pages/clientes/Clientes.jsx`, `src/pages/cotizaciones/CotizacionDetalle.jsx` | Pasan pruebas de modelo y API con persistencia simulada para origen, copia, duplicados, estados y autorización. | Repetir el alta conserva la misma reserva. |
+| HU-016 | Registrar pagos informativos | NO VERIFICADA | Registro e historial de pagos de referencia, validación, total pagado y saldo calculados en servidor. | Verificar concurrencia y recarga en navegador con MongoDB. | `server/reservation-model.js`, `server/reservation-routes.js`, `src/pages/reservas/PagosInformativos.jsx` | Pasan pruebas de API y modelo para autorización, validación, deduplicación, concurrencia y saldo. | Se rechazan sobrepagos. Los registros permanecen en el historial. |
 | HU-017 | Consultar indicadores comerciales | PARCIAL | Conteos de contactos y prospectos sobre datos recibidos en Clientes. Estructura de tarjetas del dashboard. | Dashboard conectado a datos, conteos de contactos y oportunidades abiertas/ganadas/perdidas, conversión y ventas. | `src/pages/dashboard/Dashboard.jsx`, `src/pages/clientes/Clientes.jsx` | Sin pruebas de indicadores. | El criterio histórico de tareas pendientes/vencidas queda fuera por decisión de alcance. |
 | HU-018 | Consultar reportes comerciales | PENDIENTE | — | Destinos más solicitados, ventas por periodo, filtros de fechas y tablas o gráficas coherentes con datos persistidos. | — | Sin pruebas. | Depende de solicitudes y reservas. |
 | HU-019 | Buscar y filtrar registros | PARCIAL | Búsqueda de contactos por nombre o datos de contacto y filtro por estado sobre registros que devuelve la API según su alcance. | Folios de cotización y reserva, filtros de oportunidades y reservas por estado y verificación de resultados y permisos entre módulos. | `src/pages/clientes/Clientes.jsx`, `server/app.js` | Pasa 401 sin sesión. | No se probó búsqueda con usuarios autenticados; la búsqueda actual es local a Clientes. |
@@ -83,7 +85,7 @@ Los únicos comportamientos comprobados por ejecución se enumeran en la secció
 - **F02 · Clientes, prospectos y viajeros.** Clientes y prospectos comparten la colección de contactos, con estados Prospecto, Activo e Inactivo. Origen, contacto preferido y datos de interés se almacenan en el contacto. El listado y el formulario están conectados. Los viajeros se administran desde cada solicitud. La ficha comercial de clientes sigue pendiente. La consulta individual existente puede servir de base para la ficha.
 - **F03 · Solicitudes y oportunidades.** La solicitud ya cuenta con esquema, API, listado, detalle y edición. Las oportunidades se registran desde una solicitud existente y sus etapas alimentan el embudo administrativo. Las cuatro historias de F03 tienen implementación y requieren comprobación integrada.
 - **F04 · Cotizaciones.** El catálogo y cotizador tienen implementación de lectura, creación, consulta y edición. El listado por oportunidad ya está disponible. El ciclo de estados, el historial comercial y el documento imprimible por versión están implementados. Falta verificar la integración con MongoDB y navegador.
-- **F06 · Reservas y pagos informativos.** La navegación ofrece un acceso sin implementación funcional. Se requiere una reserva interna que conserve los datos comerciales aceptados y un historial de pagos informativos que permita calcular saldo.
+- **F06 · Reservas y pagos informativos.** El flujo registra reservas internas a partir de la versión aceptada, conserva datos comerciales y agrega pagos informativos con saldo calculado en servidor. El historial de reservas está enlazado desde Clientes. La integración con MongoDB y el navegador queda por verificar.
 - **F07 · Panel, reportes y búsquedas.** El dashboard no invoca la API. Los conteos y filtros en Clientes son reutilizables como comportamiento de referencia. La vista contiene texto residual sobre actividades; no implica que ese módulo pertenezca al MVP. Los indicadores y reportes requieren datos comerciales que hoy no existen.
 
 ## 7. Integración entre frontend, backend y MongoDB
@@ -154,8 +156,27 @@ Se intercambian precios como cadenas decimales de hasta dos posiciones. El front
 - Las cotizaciones comienzan en Borrador. Si están vigentes, Borrador pasa a Enviada y Enviada puede pasar a Aceptada o Rechazada. Pasada la vigencia inclusiva en Ciudad de México, Borrador y Enviada se leen como Vencida. El usuario puede registrar ese vencimiento. No se usa un proceso programado. Aceptada y Rechazada no se convierten en Vencida.
 - Un PUT conserva el folio, archiva la versión comercial previa con su estado al archivarse e incrementa su número. El borrador nuevo puede originarse en Borrador, Enviada, Rechazada o Vencida. El contenido y estado de un archivo histórico quedan fijos. Solo la versión actual puede cambiar de estado. La cotización aceptada es terminal y queda bloqueada para edición.
 - `historial[]` guarda los conceptos, referencias, precios, subtotales, total, condiciones, observaciones, vigencia, datos de cliente y fechas de cada versión anterior. La versión actual mantiene los campos de HU-010. Se archiva y reemplaza en una sola escritura con revisión optimista. Las cotizaciones previas se leen como versión 1 y, hasta su primera escritura, usan los datos actuales del cliente para el documento si carecen de una copia propia.
-- La aceptación guarda `versionAceptada` y `resueltaEn`. Un índice único parcial sobre la oportunidad para el estado Aceptada impide dos aceptaciones en la misma oportunidad. Una futura reserva puede identificar la cotización mediante su ID y `versionAceptada`, obtener sus conceptos e importes sin consultar el catálogo y obtener el contexto del viaje mediante la oportunidad y su solicitud.
+- La aceptación guarda `versionAceptada` y `resueltaEn`. Un índice único parcial sobre la oportunidad para el estado Aceptada impide dos aceptaciones en la misma oportunidad. La reserva identifica la cotización mediante su ID y `versionAceptada`, copia sus conceptos e importes y obtiene las fechas de la solicitud vinculada a la oportunidad.
 - `quote-document.js` genera HTML de una versión persistida. La fecha de emisión es la de envío o, si todavía no se envió, la de creación de la versión. El buscador de versiones y el documento aplican el mismo alcance que el detalle. La interfaz muestra una vista previa y abre el diálogo de impresión o guardado como PDF del navegador.
+
+### Reservas y pagos informativos
+
+`Reserva` enlaza cliente, solicitud, oportunidad, cotización, versión aceptada y asesor. Conserva el folio de origen, la copia del cliente y de los conceptos, las fechas de viaje y los importes acordados. El servidor requiere una cotización aceptada y una oportunidad en etapa Ganada al consultar el origen. Comprueba la coincidencia de cliente, asesor y solicitud. Los módulos de origen conservan sus permisos y contratos.
+
+| API | Operación |
+| --- | --- |
+| `GET/POST /api/reservas` | Lista reservas bajo el ámbito del usuario, admite filtro `estado` y registra una desde una cotización aceptada. |
+| `GET /api/reservas/:id` | Detalle de reserva, importes y pagos reportados. |
+| `PATCH /api/reservas/:id/estado` | Actualiza estado, localizador y proveedor de referencia según la revisión y las transiciones permitidas. |
+| `GET /api/clientes/:id/reservas` | Historial de reservas del cliente. |
+| `GET /api/cotizaciones/:id/reserva` | Reserva asociada o `null` para una cotización accesible sin reserva. |
+| `GET/POST /api/reservas/:id/pagos` | Consulta el historial y saldo o registra un pago informativo. |
+
+- El folio de reserva usa `RES-` y el ObjectId completo. Un índice único por cotización asegura un solo registro, incluso con solicitudes concurrentes. El primer POST devuelve 201 y los reintentos válidos devuelven 200 con la reserva original. Se conservan los datos capturados por el primer registro.
+- RF-08 define los estados. Se permite Pendiente de pago → Confirmada o Cancelada, Confirmada → En viaje o Cancelada y En viaje → Completada. Completada y Cancelada son terminales. Confirmar es una decisión interna independiente del pago. El localizador y proveedor de referencia son capturas manuales.
+- Los pagos se almacenan como subdocumentos de la reserva e incluyen fecha civil, centavos, método, referencia, observaciones, ID de quien registra y timestamp. Se admiten fechas no futuras en Ciudad de México y montos positivos hasta el saldo disponible. Una clave UUID permite reintentar el mismo registro. El servidor también rechaza repetir método y referencia, ignorando diferencias de mayúsculas y espacios.
+- Los pagos y su total se guardan en la misma escritura con revisión optimista. Tras un conflicto, la API vuelve a verificar duplicados, cancelación y saldo. Los pagos se agregan al historial y carecen de operaciones de edición, anulación o reembolso. Se permite registrar pagos informativos en reservas completadas, pero no nuevos pagos en canceladas.
+- Para F07, `totalCentavos` representa el importe acordado, `pagadoCentavos` suma lo reportado y `saldoCentavos` es la diferencia. Las reservas tienen timestamps e índices por cliente, estado y asesor combinados con fecha de registro para consultas por periodo. Los pagos incluyen fecha del movimiento y timestamp de registro. Estos importes no dependen del catálogo.
 
 ## 8. Autenticación, roles y seguridad
 
@@ -172,13 +193,14 @@ Entorno observado: Node.js 24.13.0 y dependencias presentes en raíz y servidor.
 | Verificación | Resultado y alcance |
 | --- | --- |
 | `npm.cmd run lint` | Pasó, código de salida 0 y sin hallazgos de ESLint. |
-| `npm.cmd --prefix server test` | Pasó, 13 pruebas aprobadas, 0 fallos, 0 omitidas. |
+| `npm.cmd --prefix server test` | Pasó, 15 pruebas aprobadas, 0 fallos, 0 omitidas. |
 | `server/app.test.js`, HTTP | Confirma 401 en listado sin sesión, 403 en login desde otro origen y 400 en login con cuerpo incompleto. |
 | `server/app.test.js`, modelos | Comprueba validación en memoria de correo, teléfono, presupuesto, asesor requerido y enum de rol. |
 | `server/security.test.js` | Comprueba sal variable, verificación correcta e incorrecta, rechazo de contraseña corta y transformación del token. |
 | `server/travel.test.js` | Dos pruebas de esquema y una prueba HTTP con sesión y operaciones de colección simuladas. Comprueba permisos, asociaciones, estados, cupo, conflicto de escritura y borrado protegido. |
 | `server/opportunity.test.js` | Pruebas de modelo y HTTP con persistencia simulada para vínculos, acceso, resultados de etapa, revisiones y filtros del embudo. |
 | `server/quote.test.js` | Cinco pruebas de modelos, cálculo, vigencia, HTML y HTTP con persistencia simulada. Incluyen historial, documentos, bloqueo de cotizaciones aceptadas, rechazo, conflictos y compatibilidad previa. |
+| `server/reservation.test.js` | Dos pruebas de esquema y HTTP con persistencia simulada. Cubren origen, relaciones, estados, deduplicación, permisos y saldo bajo concurrencia. |
 | `npm.cmd run build` | Pasó. Generó los archivos ignorados de `dist/`. |
 | `dev` y `preview` de raíz | No ejecutados. Sirven la SPA y la salida de build, respectivamente. No se encontró script de pruebas de frontend ni suite de navegador. |
 | `dev`, `start`, `seed:admin` de servidor | No ejecutados. Cargan `.env`; los dos primeros inicializan MongoDB y el tercero escribe un usuario. |
@@ -190,6 +212,8 @@ Para HU-007 y HU-008 falta verificar índices y consultas de Mongoose con MongoD
 Para HU-009 y HU-010 falta comprobar consulta a colecciones reales, índice de folio, selección desde el navegador, persistencia después de recargar, aislamiento por asesor y concurrencia de ediciones sobre MongoDB. El entorno de prueba requiere servicios registrados con datos autorizados.
 
 Para HU-011 y HU-012 falta validar el índice parcial y la revisión optimista sobre MongoDB real, revisar documentos históricos y aceptados desde el navegador y comprobar paginación, diálogo de impresión y guardado como PDF.
+
+Para HU-015 y HU-016 falta verificar los índices y la revisión con MongoDB real, la copia de los datos aceptados, los reintentos y pagos concurrentes, el historial del cliente y la navegación completa desde una cotización.
 
 ## 10. Errores, limitaciones y riesgos detectados
 
@@ -209,6 +233,7 @@ Para HU-011 y HU-012 falta validar el índice parcial y la revisión optimista s
 | Media | El listado de oportunidades y las tarjetas del embudo no tienen paginación. La reasignación a otro propietario queda fuera del flujo actual para preservar el alcance de contactos y solicitudes. |
 | Media | Catálogo y cotizaciones carecen de paginación. El catálogo necesita registros provisionados en MongoDB. El tope general de 32 KB de la API también aplica al formulario de cotizaciones. |
 | Media | El historial de cotizaciones embebido comparte el límite BSON de 16 MiB con su documento. El PDF usa el diálogo de impresión del navegador. |
+| Media | Los pagos embebidos comparten el límite BSON de 16 MiB de la reserva. El listado y el historial de pagos aún no tienen paginación. |
 | Baja | El cliente no distingue indisponibilidad de API durante la restauración de sesión; el HTML declara idioma inglés aunque la interfaz es española. La vista inicial y el mapa de títulos conservan referencias residuales de actividades. |
 
 Los riesgos de ejecución se infieren del código o configuración. No se reprodujeron con datos persistentes ni se evaluó el despliegue real.
@@ -218,6 +243,7 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 - **HU-004.** Completar ficha y datos comerciales, integrar el detalle existente y añadir la paginación prevista. Las relaciones dependen de los módulos comerciales.
 - **HU-017.** Conectar el dashboard a conteos, conversión y ventas persistidas, con la visibilidad que corresponda al usuario.
 - **HU-019.** Extender búsqueda y filtros más allá de los contactos y verificar visibilidad en servidor.
+- **HU-015 y HU-016.** Implementadas. Pendiente la verificación integrada con MongoDB y navegador.
 - **HU-011 y HU-012.** Implementadas. Pendiente la comprobación integrada con MongoDB y navegador.
 - **HU-009 y HU-010.** Implementadas. Pendiente la comprobación integrada con MongoDB y navegador.
 - **HU-007 y HU-008.** Disponibles en código. Pendiente la verificación integrada con MongoDB y navegador.
@@ -228,7 +254,6 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 
 | Épica | Entregables funcionales pendientes |
 | --- | --- |
-| F06 | Reservas y pagos informativos (HU-015, HU-016). |
 | F07 | Reportes de destinos y ventas (HU-018). |
 
 ## 13. Dependencias entre módulos
@@ -244,7 +269,7 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 1. Verificar F01, el alta de contactos y HU-005/HU-006 con datos aislados cuando se autorice el entorno. Confirmar el ciclo de persistencia, el aislamiento y el borrado protegido.
 2. Verificar HU-007 y HU-008 con datos aislados. Las solicitudes y oportunidades disponibles pueden alimentar la ficha comercial de HU-004.
 3. Verificar F04 con MongoDB y navegador, en especial la identificación de la versión aceptada y el índice único por oportunidad.
-4. Implementar HU-015 desde la cotización aceptada y luego HU-016. Incorporar las reservas a la ficha comercial.
+4. Verificar F06 con datos aislados. Confirmar los índices únicos, la consistencia de saldo y el historial de cliente.
 5. Agregar filtros y búsquedas de HU-019 al madurar las entidades correspondientes. Completar HU-017 y HU-018 con datos reales una vez disponibles las fuentes de oportunidades, solicitudes y ventas.
 
 ## 15. Instrucciones y contexto para futuras sesiones de Codex
@@ -253,4 +278,4 @@ Los riesgos de ejecución se infieren del código o configuración. No se reprod
 - Reutilizar `api.js`, `SessionProvider`, guardas de rutas, `MainLayout`, `Sidebar`, `ConfirmDialog`, formularios y estilos existentes. Conservar los flujos de login, usuarios y contactos, y usar los modelos, el middleware de autorización y el manejo de errores actuales como puntos de integración.
 - Mantener la autorización en servidor y validar el aislamiento entre asesores en las nuevas operaciones. Preservar el contrato con la SPA y el despliegue de mismo origen. Evaluar compatibilidad con documentos previos antes de endurecer esquemas o añadir relaciones.
 - DESARROLLO menciona contactos históricos en localStorage. El código actual de Clientes obtiene los registros de la API y en `src/` no se encontraron lecturas de localStorage ni importación. Cualquier dato legado y su titularidad quedan sin verificar.
-- Para continuar, verificar primero los flujos base cuando se autorice un entorno MongoDB aislado. Las siguientes historias nuevas son HU-015 y HU-016. Cuando se autoricen, usar la cotización y su `versionAceptada` como referencia a los datos comerciales acordados. Mantener separadas revisión de concurrencia y versión comercial. Esta etapa se limita a HU-011 y HU-012.
+- Para continuar, verificar primero los flujos base cuando se autorice un entorno MongoDB aislado. El siguiente bloque corresponde a F07. Cuando se autorice, usar los importes acordados de las reservas, los pagos informativos y las fechas persistidas. Mantener separadas revisión de concurrencia y versión comercial. Esta etapa se limita a HU-015 y HU-016.

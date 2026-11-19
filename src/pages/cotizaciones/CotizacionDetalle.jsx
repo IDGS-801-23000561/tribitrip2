@@ -106,6 +106,7 @@ function Detalle({ id }) {
               </dl>
               <div className="formulario-acciones">
                 <Link to={preview(quote.version)}>Ver documento imprimible</Link>
+                {quote.estado === "Aceptada" && <Link to={"/reservas/nueva?cotizacion=" + id}>Registrar o consultar reserva</Link>}
                 {quote.estado !== "Aceptada" && !pending && (
                   <button type="button" className="btn-primary" onClick={() => {
                     setNotice("");

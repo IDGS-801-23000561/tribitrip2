@@ -27,7 +27,7 @@ const snapshotSchema = new Schema({
   precioReferenciaCentavos: money,
 }, { _id: false });
 
-const conceptSchema = new Schema({
+export const conceptSchema = new Schema({
   servicio: { type: Schema.Types.ObjectId, ref: "ServicioTuristico", default: null },
   referencia: { type: snapshotSchema, default: null },
   descripcion: requiredText(400),
@@ -36,7 +36,7 @@ const conceptSchema = new Schema({
   subtotalCentavos: money,
 });
 
-const clientSnapshot = new Schema({
+export const clientSnapshot = new Schema({
   nombre: requiredText(120),
   correo: text(254),
   telefono: text(15),

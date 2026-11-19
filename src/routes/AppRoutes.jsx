@@ -14,6 +14,9 @@ import Cotizaciones from "../pages/cotizaciones/Cotizaciones";
 import NuevaCotizacion from "../pages/cotizaciones/NuevaCotizacion";
 import CotizacionDetalle from "../pages/cotizaciones/CotizacionDetalle";
 import CotizacionDocumento from "../pages/cotizaciones/CotizacionDocumento";
+import Reservas from "../pages/reservas/Reservas";
+import NuevaReserva from "../pages/reservas/NuevaReserva";
+import ReservaDetalle from "../pages/reservas/ReservaDetalle";
 import { useSession } from "../auth/session";
 function PrivateRoute() {
   const { usuario, cargando } = useSession();
@@ -50,12 +53,9 @@ export default function AppRoutes() {
           <Route path="cotizaciones/nueva" element={<NuevaCotizacion />} />
           <Route path="cotizaciones/:id" element={<CotizacionDetalle />} />
           <Route path="cotizaciones/:id/versiones/:version/documento" element={<CotizacionDocumento />} />
-          <Route path="reservas" element={
-            <section className="panel">
-              <h2>Reservas</h2>
-              <p>Este módulo se encuentra en desarrollo.</p>
-            </section>
-          } />
+          <Route path="reservas" element={<Reservas />} />
+          <Route path="reservas/nueva" element={<NuevaReserva />} />
+          <Route path="reservas/:id" element={<ReservaDetalle />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

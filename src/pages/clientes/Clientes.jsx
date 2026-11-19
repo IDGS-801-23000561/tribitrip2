@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import "./Clientes.css";
 import { api } from "../../services/api";
 import ConfirmDialog from "../../components/ConfirmDialog";
@@ -294,6 +295,7 @@ function Clientes() {
                   <td>{cliente.destinoInteres || "—"}</td>
                   <td>
                     <div className="acciones-cliente">
+                      <Link to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
                       <button onClick={() => editarCliente(cliente)}>
                         Editar
                       </button>
