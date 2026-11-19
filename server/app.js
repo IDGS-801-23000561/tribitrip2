@@ -5,6 +5,8 @@ import { rateLimit } from "express-rate-limit";
 import { randomBytes } from "node:crypto";
 import mongoose from "mongoose";
 import { Usuario, Sesion, Cliente } from "./models.js";
+import { registerTravelRoutes } from "./travel-routes.js";
+import { registerOpportunityRoutes } from "./opportunity-routes.js";
 import {
   hashPassword,
   verifyPassword,
@@ -137,11 +139,11 @@ app.put("/api/usuarios/:id", admin, validId, async (req, res) => {
 });
 const scope = (req) =>
   req.usuario.rol === "Administrador" ? {} : { asesor: req.usuario._id };
-const clientJson = (c) => ({
-  ...c.toObject(),
-  id: String(c._id),
-  fechaRegistro: c.createdAt,
-});
+const clientJson = (c) => {
+  const data = c.toObject();
+  delete data.solicitudes;
+  return { ...data, id: String(c._id), fechaRegistro: c.createdAt };
+};
 function clientData(body) {
   const fields = [
     "nombre",
@@ -202,13 +204,19 @@ app.put("/api/clientes/:id", validId, async (req, res) => {
   res.json(clientJson(cliente));
 });
 app.delete("/api/clientes/:id", validId, async (req, res) => {
+  const filter = { _id: req.params.id, ...scope(req) };
   const cliente = await Cliente.findOneAndDelete({
-    _id: req.params.id,
-    ...scope(req),
+    ...filter, "solicitudes.0": { $exists: false },
   });
-  if (!cliente) throw fail(404, "Contacto no encontrado.");
+  if (!cliente) {
+    if (await Cliente.exists(filter))
+      throw fail(409, "No se puede eliminar un contacto con solicitudes de viaje.");
+    throw fail(404, "Contacto no encontrado.");
+  }
   res.sendStatus(204);
 });
+registerTravelRoutes(app, { scope, fail, validId });
+registerOpportunityRoutes(app, { scope, fail, validId, admin });
 app.use("/api", (req, res) =>
   res.status(404).json({ mensaje: "Ruta no encontrada." }),
 );

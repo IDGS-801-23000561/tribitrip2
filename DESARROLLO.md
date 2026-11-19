@@ -17,7 +17,25 @@ Sesiones de ocho horas con cookie HttpOnly y SameSite estricto, tokens aleatorio
 Administrador: consulta todos los contactos y administra usuarios. Asesor: registra y administra únicamente sus propios contactos. No se permite desactivarse ni quitarse el rol de administrador.
 Clientes con alta, consulta, edición, eliminación, validación en servidor e índices únicos globales para correo y teléfono. Los duplicados no revelan datos de otros asesores.
 Los contactos anteriores de localStorage no se borran ni se importan automáticamente; no pertenecen a una cuenta autenticada.
-HU-003 y HU-004 avanzadas: siguen pendientes paginación, ficha comercial y relaciones con solicitudes/oportunidades. Viajeros y módulos de semana 3 siguen pendientes. F05 queda fuera del alcance.
+HU-003 y HU-004 avanzadas: siguen pendientes paginación y ficha comercial de contactos. F05 queda fuera del alcance.
+
+## Solicitudes y viajeros
+
+En el menú **Solicitudes de viaje**, selecciona **Nueva solicitud** y un contacto accesible para registrar el viaje. Abre una solicitud del listado para editarla o registrar y editar acompañantes. El asesor responsable es el propietario del contacto. El administrador puede operar todos los contactos y el asesor opera los propios.
+
+Las solicitudes y los viajeros se almacenan como subdocumentos de cliente. El borrado del contacto queda bloqueado mientras tenga solicitudes, incluso canceladas. La cantidad de viajeros de la solicitud debe cubrir a todos los acompañantes registrados.
+
+Las pruebas HTTP usan persistencia simulada. Para verificar la integración en un entorno MongoDB aislado y autorizado, comprueba que una solicitud y sus viajeros se conservan al recargar, que otro asesor no puede consultarlos ni modificarlos y que el borrado del contacto devuelve un conflicto. Comprueba también que dos altas simultáneas con un solo lugar disponible no exceden el cupo.
+
+## Oportunidades y embudo
+
+En **Oportunidades**, registra un título y selecciona una solicitud de viaje accesible. El cliente y el responsable se toman del vínculo con esa solicitud. Un administrador puede crear la oportunidad para un contacto de cualquier propietario; un asesor solo puede crearla y editarla dentro de su ámbito.
+
+La etapa inicial es **Solicitud recibida**. El detalle permite cambiar libremente entre las seis etapas de RF-05, incluidas Ganada y Perdida. El cierre registra el resultado y su fecha. Volver a una etapa abierta limpia la fecha de cierre. Si otra edición guardó una revisión más reciente, recarga el detalle antes de volver a editar.
+
+En **Embudo de ventas**, disponible para administradores, filtra por responsable o estado y abre el detalle desde cada tarjeta. La vista consulta la API al entrar, al cambiar filtros y al pulsar **Actualizar embudo**.
+
+Para verificar la integración con MongoDB en un entorno autorizado, comprueba el vínculo con la solicitud tras recargar, las restricciones con dos asesores y un administrador, el conflicto con dos pestañas editando la misma revisión y el movimiento de las tarjetas y sus conteos al cambiar de etapa.
 
 ## Verificación
 npm.cmd run lint

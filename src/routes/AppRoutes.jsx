@@ -4,6 +4,11 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Clientes from "../pages/clientes/Clientes";
 import Login from "../pages/Login";
 import Usuarios from "../pages/Usuarios";
+import Solicitudes from "../pages/solicitudes/Solicitudes";
+import SolicitudDetalle from "../pages/solicitudes/SolicitudDetalle";
+import Oportunidades from "../pages/oportunidades/Oportunidades";
+import OportunidadDetalle from "../pages/oportunidades/OportunidadDetalle";
+import Embudo from "../pages/oportunidades/Embudo";
 import { useSession } from "../auth/session";
 function PrivateRoute() {
   const { usuario, cargando } = useSession();
@@ -13,7 +18,7 @@ function PrivateRoute() {
 function AdminRoute() {
   const { usuario } = useSession();
   return usuario?.rol === "Administrador" ? (
-    <Usuarios />
+    <Outlet />
   ) : (
     <Navigate to="/dashboard" replace />
   );
@@ -27,8 +32,15 @@ export default function AppRoutes() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="clientes" element={<Clientes />} />
-          <Route path="usuarios" element={<AdminRoute />} />
-          {["solicitudes", "oportunidades", "cotizaciones", "reservas"].map(
+          <Route element={<AdminRoute />}>
+            <Route path="usuarios" element={<Usuarios />} />
+            <Route path="oportunidades/embudo" element={<Embudo />} />
+          </Route>
+          <Route path="solicitudes" element={<Solicitudes />} />
+          <Route path="solicitudes/:id" element={<SolicitudDetalle />} />
+          <Route path="oportunidades" element={<Oportunidades />} />
+          <Route path="oportunidades/:id" element={<OportunidadDetalle />} />
+          {["cotizaciones", "reservas"].map(
             (path) => (
               <Route
                 key={path}

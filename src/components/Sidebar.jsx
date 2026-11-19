@@ -5,6 +5,7 @@ import {
   Users,
   Plane,
   TrendingUp,
+  ChartNoAxesCombined,
   FileText,
   CalendarCheck,
 } from "lucide-react";
@@ -29,6 +30,12 @@ const secciones = [
     ruta: "/oportunidades",
     nombre: "Oportunidades",
     icono: TrendingUp,
+  },
+  {
+    ruta: "/oportunidades/embudo",
+    nombre: "Embudo de ventas",
+    icono: ChartNoAxesCombined,
+    admin: true,
   },
   {
     ruta: "/cotizaciones",
@@ -63,13 +70,14 @@ function Sidebar() {
           ...(usuario.rol === "Administrador"
             ? [{ ruta: "/usuarios", nombre: "Usuarios", icono: Users }]
             : []),
-        ].map((seccion) => {
+        ].filter((seccion) => !seccion.admin || usuario.rol === "Administrador").map((seccion) => {
           const Icono = seccion.icono;
 
           return (
             <NavLink
               key={seccion.ruta}
               to={seccion.ruta}
+              end={seccion.ruta === "/oportunidades" && usuario.rol === "Administrador"}
               className={({ isActive }) => (isActive ? "activo" : "")}
             >
               <Icono size={19} aria-hidden="true" />

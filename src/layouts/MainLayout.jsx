@@ -8,6 +8,7 @@ const titulos = {
   "/clientes": "Clientes y prospectos",
   "/solicitudes": "Solicitudes de viaje",
   "/oportunidades": "Oportunidades comerciales",
+  "/oportunidades/embudo": "Embudo de ventas",
   "/cotizaciones": "Cotizaciones",
   "/reservas": "Reservas",
   "/actividades": "Seguimiento de actividades",
@@ -17,7 +18,8 @@ function MainLayout() {
   const location = useLocation();
   const { usuario, logout } = useSession();
   const [error, setError] = useState("");
-  const titulo = titulos[location.pathname] || "TribiTrip";
+  const seccion = "/" + location.pathname.split("/")[1];
+  const titulo = titulos[location.pathname] || titulos[seccion] || "TribiTrip";
 
   return (
     <div className="app-layout">

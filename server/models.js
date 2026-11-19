@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import dns from "node:dns";
+import { Oportunidad } from "./opportunity-model.js";
+import { travelRequestSchema } from "./travel-models.js";
 
 const { Schema } = mongoose;
 const email = {
@@ -45,6 +47,7 @@ const clientSchema = new Schema(
     contactoPreferido: { type: String, maxlength: 100, default: "WhatsApp" },
     destinoInteres: { type: String, maxlength: 200, default: "" },
     presupuesto: { type: Number, min: 0, default: null },
+    solicitudes: { type: [travelRequestSchema], select: false },
     asesor: {
       type: Schema.Types.ObjectId,
       ref: "Usuario",
@@ -54,6 +57,7 @@ const clientSchema = new Schema(
   },
   { timestamps: true },
 );
+clientSchema.index({ "solicitudes._id": 1 }, { sparse: true });
 export const Usuario = mongoose.model("Usuario", userSchema);
 export const Sesion = mongoose.model("Sesion", sessionSchema);
 export const Cliente = mongoose.model("Cliente", clientSchema);
@@ -64,5 +68,5 @@ export async function connect() {
   await mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
   });
-  await Promise.all([Usuario.init(), Sesion.init(), Cliente.init()]);
+  await Promise.all([Usuario.init(), Sesion.init(), Cliente.init(), Oportunidad.init()]);
 }
