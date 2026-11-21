@@ -2,7 +2,12 @@ import { useState } from "react";
 
 const estados = ["Nueva", "En revisión", "Contactado", "Atendida", "Cancelada"];
 
-export default function SolicitudForm({ solicitud, clientes, onSave, onCancel }) {
+export default function SolicitudForm({
+  solicitud,
+  clientes,
+  onSave,
+  onCancel,
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function submit(event) {
@@ -33,7 +38,9 @@ export default function SolicitudForm({ solicitud, clientes, onSave, onCancel })
         <label>
           Cliente o prospecto
           <select name="cliente" required defaultValue="">
-            <option value="" disabled>Selecciona un contacto</option>
+            <option value="" disabled>
+              Selecciona un contacto
+            </option>
             {clientes.map((cliente) => (
               <option key={cliente.id} value={cliente.id}>
                 {cliente.nombre} ({cliente.correo})
@@ -42,28 +49,85 @@ export default function SolicitudForm({ solicitud, clientes, onSave, onCancel })
           </select>
         </label>
       )}
-      <label className={solicitud ? "campo-ancho" : undefined}>Destino<input name="destino" required maxLength={200} defaultValue={solicitud?.destino} /></label>
-      <label>Salida<input name="salida" type="date" required defaultValue={solicitud?.salida} /></label>
-      <label>Regreso<input name="regreso" type="date" required defaultValue={solicitud?.regreso} /></label>
-      <label>Presupuesto (MXN)<input name="presupuesto" type="number" required min={0} step="any" defaultValue={solicitud?.presupuesto} /></label>
+      <label className={solicitud ? "campo-ancho" : undefined}>
+        Destino
+        <input
+          name="destino"
+          required
+          maxLength={200}
+          defaultValue={solicitud?.destino}
+        />
+      </label>
+      <label>
+        Salida
+        <input
+          name="salida"
+          type="date"
+          required
+          defaultValue={solicitud?.salida}
+        />
+      </label>
+      <label>
+        Regreso
+        <input
+          name="regreso"
+          type="date"
+          required
+          defaultValue={solicitud?.regreso}
+        />
+      </label>
+      <label>
+        Presupuesto (MXN)
+        <input
+          name="presupuesto"
+          type="number"
+          required
+          min={0}
+          step="any"
+          defaultValue={solicitud?.presupuesto}
+        />
+      </label>
       <label>
         Número de viajeros
-        <input name="cantidadViajeros" type="number" required min={Math.max(1, solicitud?.viajeros.length ?? 0)} step={1} defaultValue={solicitud?.cantidadViajeros ?? 1} />
+        <input
+          name="cantidadViajeros"
+          type="number"
+          required
+          min={Math.max(1, solicitud?.viajeros.length ?? 0)}
+          step={1}
+          defaultValue={solicitud?.cantidadViajeros ?? 1}
+        />
       </label>
       <label>
         Estado
         <select name="estado" defaultValue={solicitud?.estado ?? "Nueva"}>
-          {estados.map((estado) => <option key={estado}>{estado}</option>)}
+          {estados.map((estado) => (
+            <option key={estado}>{estado}</option>
+          ))}
         </select>
       </label>
       <label>
         Necesidades específicas
-        <textarea name="necesidades" maxLength={1000} rows={3} defaultValue={solicitud?.necesidades} />
+        <textarea
+          name="necesidades"
+          maxLength={1000}
+          rows={3}
+          defaultValue={solicitud?.necesidades}
+        />
       </label>
       {error && <p role="alert">{error}</p>}
       <div className="formulario-acciones">
-        <button type="button" className="btn-secondary" disabled={busy} onClick={onCancel}>Cancelar</button>
-        <button className="btn-primary" disabled={busy}>{busy ? "Guardando…" : "Guardar solicitud"}</button>
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={busy}
+          onClick={onCancel}
+        >
+          Cancelar
+        </button>
+        <button className="btn-primary" disabled={busy}>
+          {busy ? "Guardando…" : "Guardar solicitud"}
+        </button>
       </div>
     </form>
   );

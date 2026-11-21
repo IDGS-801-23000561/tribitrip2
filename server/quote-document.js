@@ -1,16 +1,35 @@
-const money = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", currencyDisplay: "code" });
-const date = new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "America/Mexico_City" });
-const symbols = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => symbols[character]);
+const money = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  currencyDisplay: "code",
+});
+const date = new Intl.DateTimeFormat("es-MX", {
+  dateStyle: "long",
+  timeZone: "America/Mexico_City",
+});
+const symbols = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+const escape = (value) =>
+  String(value ?? "").replace(/[&<>"']/g, (character) => symbols[character]);
 const amount = (cents) => money.format(cents / 100);
-const paragraph = (title, value) => value ? `<section><h2>${title}</h2><p>${escape(value)}</p></section>` : "";
+const paragraph = (title, value) =>
+  value ? `<section><h2>${title}</h2><p>${escape(value)}</p></section>` : "";
 
 export function quoteDocument(folio, version) {
   const client = version.clienteDocumento;
-  const rows = version.conceptos.map((line) => `<tr>
+  const rows = version.conceptos
+    .map(
+      (line) => `<tr>
     <td>${escape(line.descripcion)}${line.referencia?.proveedor ? `<small>${escape(line.referencia.proveedor)}</small>` : ""}</td>
     <td>${escape(line.cantidad)}</td><td>${amount(line.precioUnitarioCentavos)}</td><td>${amount(line.subtotalCentavos)}</td>
-  </tr>`).join("");
+  </tr>`,
+    )
+    .join("");
   return `<!doctype html>
 <html lang="es-MX"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cotización ${escape(folio)} · Versión ${escape(version.version)}</title>

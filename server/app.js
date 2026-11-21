@@ -182,7 +182,11 @@ function clientData(body) {
 }
 app.get("/api/clientes", async (req, res) => {
   const filter = scope(req);
-  const estado = enumFilter(req.query.estado, ["Prospecto", "Activo", "Inactivo"], "Estado de cliente");
+  const estado = enumFilter(
+    req.query.estado,
+    ["Prospecto", "Activo", "Inactivo"],
+    "Estado de cliente",
+  );
   if (estado) filter.estado = estado;
   const q = searchText(req.query.q);
   if (q) {
@@ -191,14 +195,21 @@ app.get("/api/clientes", async (req, res) => {
     if (/^[+()\d.\s-]+$/.test(q) && /\d/.test(q))
       filter.$or.push({ telefono: literal(q.replace(/\D/g, "")) });
   }
-  const page = await listResult(req.query, Cliente, filter,
-    Cliente.find(filter).sort({ createdAt: -1, _id: -1 }), clientJson);
+  const page = await listResult(
+    req.query,
+    Cliente,
+    filter,
+    Cliente.find(filter).sort({ createdAt: -1, _id: -1 }),
+    clientJson,
+  );
   if (Array.isArray(page)) return res.json(page);
   const counts = await Cliente.aggregate([
     { $match: scope(req) },
     { $group: { _id: "$estado", cantidad: { $sum: 1 } } },
   ]);
-  const resumen = Object.fromEntries(counts.map(({ _id, cantidad }) => [_id, cantidad]));
+  const resumen = Object.fromEntries(
+    counts.map(({ _id, cantidad }) => [_id, cantidad]),
+  );
   return res.json({ ...page, resumen });
 });
 app.get("/api/clientes/:id", validId, async (req, res) => {
@@ -222,15 +233,23 @@ app.put("/api/clientes/:id", validId, async (req, res) => {
     if (!Number.isSafeInteger(revisionContacto) || revisionContacto < 0)
       throw fail(400, "Revisión de contacto inválida.");
     if (revisionContacto === 0)
-      match.$or = [{ revisionContacto: 0 }, { revisionContacto: { $exists: false } }];
+      match.$or = [
+        { revisionContacto: 0 },
+        { revisionContacto: { $exists: false } },
+      ];
     else match.revisionContacto = revisionContacto;
   }
-  const cliente = await Cliente.findOneAndUpdate(match,
+  const cliente = await Cliente.findOneAndUpdate(
+    match,
     { $set: clientData(body), $inc: { revisionContacto: 1 } },
-    { new: true, runValidators: true });
+    { new: true, runValidators: true },
+  );
   if (!cliente) {
-    if (revisionContacto !== undefined && await Cliente.exists(filter))
-      throw fail(409, "El contacto cambió. Vuelve a abrir su ficha antes de editar.");
+    if (revisionContacto !== undefined && (await Cliente.exists(filter)))
+      throw fail(
+        409,
+        "El contacto cambió. Vuelve a abrir su ficha antes de editar.",
+      );
     throw fail(404, "Contacto no encontrado.");
   }
   res.json(clientJson(cliente));
@@ -238,11 +257,15 @@ app.put("/api/clientes/:id", validId, async (req, res) => {
 app.delete("/api/clientes/:id", validId, async (req, res) => {
   const filter = { _id: req.params.id, ...scope(req) };
   const cliente = await Cliente.findOneAndDelete({
-    ...filter, "solicitudes.0": { $exists: false },
+    ...filter,
+    "solicitudes.0": { $exists: false },
   });
   if (!cliente) {
     if (await Cliente.exists(filter))
-      throw fail(409, "No se puede eliminar un contacto con solicitudes de viaje.");
+      throw fail(
+        409,
+        "No se puede eliminar un contacto con solicitudes de viaje.",
+      );
     throw fail(404, "Contacto no encontrado.");
   }
   res.sendStatus(204);
@@ -262,19 +285,13 @@ app.use((error, req, res, next) => {
       .status(409)
       .json({ mensaje: "Ya existe un registro con ese correo o teléfono." });
   if (error.name === "ValidationError" || error.name === "CastError")
-    return res
-      .status(400)
-      .json({
-        mensaje: "Revisa los campos obligatorios, formatos e importes.",
-      });
+    return res.status(400).json({
+      mensaje: "Revisa los campos obligatorios, formatos e importes.",
+    });
   const status = error.status || 500;
   if (status >= 500) console.error("Error API:", error.name);
-  res
-    .status(status)
-    .json({
-      mensaje:
-        status >= 500
-          ? "No fue posible completar la operación."
-          : error.message,
-    });
+  res.status(status).json({
+    mensaje:
+      status >= 500 ? "No fue posible completar la operación." : error.message,
+  });
 });

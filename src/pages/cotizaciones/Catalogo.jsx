@@ -9,11 +9,16 @@ function ServicioDetalle({ id }) {
   if (!data) return <p role="status">Cargando servicio…</p>;
   return (
     <dl>
-      <dt>Descripción</dt><dd>{data.descripcion}</dd>
-      <dt>Tipo y categoría</dt><dd>{[data.tipo, data.categoria].filter(Boolean).join(" · ")}</dd>
-      <dt>Destino</dt><dd>{data.destino || "—"}</dd>
-      <dt>Proveedor</dt><dd>{data.proveedor || "—"}</dd>
-      <dt>Precio de referencia</dt><dd>{mostrarImporte(data.precioReferenciaCentavos)}</dd>
+      <dt>Descripción</dt>
+      <dd>{data.descripcion}</dd>
+      <dt>Tipo y categoría</dt>
+      <dd>{[data.tipo, data.categoria].filter(Boolean).join(" · ")}</dd>
+      <dt>Destino</dt>
+      <dd>{data.destino || "—"}</dd>
+      <dt>Proveedor</dt>
+      <dd>{data.proveedor || "—"}</dd>
+      <dt>Precio de referencia</dt>
+      <dd>{mostrarImporte(data.precioReferenciaCentavos)}</dd>
     </dl>
   );
 }
@@ -32,11 +37,21 @@ export default function Catalogo({ onSelect, disabled = false }) {
 
   return (
     <section className="panel">
-      {!onSelect && <Link className="btn-secondary" to="/cotizaciones">Volver a cotizaciones</Link>}
+      {!onSelect && (
+        <Link className="btn-secondary" to="/cotizaciones">
+          Volver a cotizaciones
+        </Link>
+      )}
       <h2>Catálogo de servicios turísticos</h2>
       <form className="account-form formulario-grid" onSubmit={search}>
-        <label>Nombre o destino<input name="q" type="search" maxLength={120} /></label>
-        <label>Filtrar por destino<input name="destino" type="search" maxLength={120} /></label>
+        <label>
+          Nombre o destino
+          <input name="q" type="search" maxLength={120} />
+        </label>
+        <label>
+          Filtrar por destino
+          <input name="destino" type="search" maxLength={120} />
+        </label>
         <button className="btn-secondary">Buscar</button>
       </form>
       {error && <p role="alert">{error}</p>}
@@ -46,14 +61,42 @@ export default function Catalogo({ onSelect, disabled = false }) {
         <article className="panel" key={servicio.id}>
           <h3>{servicio.nombre}</h3>
           <p>{servicio.descripcion}</p>
-          <p>{[servicio.destino, servicio.proveedor, mostrarImporte(servicio.precioReferenciaCentavos)].filter(Boolean).join(" · ")}</p>
-          <button type="button" className="btn-secondary" aria-expanded={selected === servicio.id} onClick={() => {
-            setSelected(selected === servicio.id ? null : servicio.id);
-          }}>{selected === servicio.id ? "Ocultar detalle" : "Ver detalle"}</button>
-          {" "}
-          {onSelect
-            ? <button type="button" className="btn-primary" disabled={disabled} onClick={() => onSelect(servicio)}>Agregar a la cotización</button>
-            : <Link className="btn-primary" to={"/cotizaciones/nueva?servicio=" + servicio.id}>Cotizar este servicio</Link>}
+          <p>
+            {[
+              servicio.destino,
+              servicio.proveedor,
+              mostrarImporte(servicio.precioReferenciaCentavos),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          <button
+            type="button"
+            className="btn-secondary"
+            aria-expanded={selected === servicio.id}
+            onClick={() => {
+              setSelected(selected === servicio.id ? null : servicio.id);
+            }}
+          >
+            {selected === servicio.id ? "Ocultar detalle" : "Ver detalle"}
+          </button>{" "}
+          {onSelect ? (
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={disabled}
+              onClick={() => onSelect(servicio)}
+            >
+              Agregar a la cotización
+            </button>
+          ) : (
+            <Link
+              className="btn-primary"
+              to={"/cotizaciones/nueva?servicio=" + servicio.id}
+            >
+              Cotizar este servicio
+            </Link>
+          )}
           {selected === servicio.id && <ServicioDetalle id={servicio.id} />}
         </article>
       ))}

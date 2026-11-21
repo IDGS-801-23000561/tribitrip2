@@ -22,7 +22,11 @@ const formularioInicial = {
 
 function GestionClientes({ id }) {
   const [revision, setRevision] = useState(0);
-  const listado = useFilteredList(id ? null : "/clientes", ["q", "estado"], revision);
+  const listado = useFilteredList(
+    id ? null : "/clientes",
+    ["q", "estado"],
+    revision,
+  );
   const ficha = useApiData(id ? "/clientes/" + id + "/ficha" : null, revision);
   const clientes = listado.data?.items ?? [];
   const resumen = listado.data?.resumen;
@@ -125,10 +129,10 @@ function GestionClientes({ id }) {
 
     setGuardando(true);
     try {
-      await api(
-        "/clientes" + (editandoId ? "/" + editandoId : ""),
-        { method: editandoId ? "PUT" : "POST", body: datos },
-      );
+      await api("/clientes" + (editandoId ? "/" + editandoId : ""), {
+        method: editandoId ? "PUT" : "POST",
+        body: datos,
+      });
       setRevision((prev) => prev + 1);
       cerrarFormulario();
     } catch (err) {
@@ -163,14 +167,21 @@ function GestionClientes({ id }) {
       {error && !mostrarFormulario && <p role="alert">{error}</p>}
       {recurso.error && <p role="alert">{recurso.error}</p>}
       {id ? (
-        ficha.data && <FichaCliente ficha={ficha.data} onEdit={editarCliente} busy={guardando} />
+        ficha.data && (
+          <FichaCliente
+            ficha={ficha.data}
+            onEdit={editarCliente}
+            busy={guardando}
+          />
+        )
       ) : (
         <>
           <div className="clientes-encabezado">
             <div>
               <h2>Clientes y prospectos</h2>
               <p>
-                Administra los contactos y oportunidades comerciales de la agencia.
+                Administra los contactos y oportunidades comerciales de la
+                agencia.
               </p>
             </div>
 
@@ -186,19 +197,33 @@ function GestionClientes({ id }) {
           {resumen && (
             <div className="clientes-resumen">
               {[
-                ["Total de contactos", Object.values(resumen).reduce((sum, count) => sum + count, 0)],
+                [
+                  "Total de contactos",
+                  Object.values(resumen).reduce((sum, count) => sum + count, 0),
+                ],
                 ["Prospectos", resumen.Prospecto ?? 0],
                 ["Clientes activos", resumen.Activo ?? 0],
                 ["Clientes inactivos", resumen.Inactivo ?? 0],
               ].map(([label, count]) => (
-                <div className="resumen-card" key={label}><span>{label}</span><strong>{count}</strong></div>
+                <div className="resumen-card" key={label}>
+                  <span>{label}</span>
+                  <strong>{count}</strong>
+                </div>
               ))}
             </div>
           )}
           <section className="clientes-panel">
-            <ListFilters list={listado} searchLabel="Nombre, correo o teléfono" selects={[
-              { name: "estado", label: "Estado", options: filterOptions(["Prospecto", "Activo", "Inactivo"]) },
-            ]} />
+            <ListFilters
+              list={listado}
+              searchLabel="Nombre, correo o teléfono"
+              selects={[
+                {
+                  name: "estado",
+                  label: "Estado",
+                  options: filterOptions(["Prospecto", "Activo", "Inactivo"]),
+                },
+              ]}
+            />
 
             <div className="tabla-contenedor">
               <table className="tabla-clientes">
@@ -217,7 +242,9 @@ function GestionClientes({ id }) {
                   {clientes.map((cliente) => (
                     <tr key={cliente.id}>
                       <td>
-                        <Link to={"/clientes/" + cliente.id}><strong>{cliente.nombre}</strong></Link>
+                        <Link to={"/clientes/" + cliente.id}>
+                          <strong>{cliente.nombre}</strong>
+                        </Link>
                         <small>{cliente.ubicacion || "Sin ubicación"}</small>
                       </td>
                       <td>
@@ -235,7 +262,12 @@ function GestionClientes({ id }) {
                       <td>{cliente.destinoInteres || "—"}</td>
                       <td>
                         <div className="acciones-cliente">
-                          <Link className="btn-secondary" to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
+                          <Link
+                            className="btn-secondary"
+                            to={"/reservas?cliente=" + cliente.id}
+                          >
+                            Historial de reservas
+                          </Link>
                           <button onClick={() => editarCliente(cliente)}>
                             Editar
                           </button>

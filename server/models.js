@@ -74,7 +74,12 @@ export async function connect() {
     serverSelectionTimeoutMS: 5000,
   });
   await Promise.all([
-    Usuario.init(), Sesion.init(), Cliente.init(), Oportunidad.init(),
-    ServicioTuristico.init(), Cotizacion.init(), Reserva.init(),
+    Usuario.init(),
+    Sesion.init(),
+    Cliente.init(),
+    Oportunidad.init(),
+    ServicioTuristico.init(),
+    Cotizacion.init(),
+    Reserva.init(),
   ]);
 }

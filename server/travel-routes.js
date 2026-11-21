@@ -6,20 +6,29 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
     const data = {};
     for (const [field, type] of Object.entries(fields)) {
       if (body?.[field] === undefined) continue;
-      if (typeof body[field] !== type) throw fail(400, "Campo inválido: " + field);
+      if (typeof body[field] !== type)
+        throw fail(400, "Campo inválido: " + field);
       data[field] = body[field];
     }
     return data;
   }
 
-  const requestData = (body) => payload(body, {
-    destino: "string", salida: "string", regreso: "string",
-    presupuesto: "number", cantidadViajeros: "number",
-    necesidades: "string", estado: "string",
-  });
+  const requestData = (body) =>
+    payload(body, {
+      destino: "string",
+      salida: "string",
+      regreso: "string",
+      presupuesto: "number",
+      cantidadViajeros: "number",
+      necesidades: "string",
+      estado: "string",
+    });
   function travelerData(body) {
     const data = payload(body, {
-      nombre: "string", parentesco: "string", tipo: "string", nacimiento: "string",
+      nombre: "string",
+      parentesco: "string",
+      tipo: "string",
+      nacimiento: "string",
     });
     if (data.nacimiento === "") data.nacimiento = null;
     return data;
@@ -36,7 +45,8 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
     };
     if (detail) {
       result.viajeros = viajeros.map(({ _id, ...data }) => ({
-        ...data, id: String(_id),
+        ...data,
+        id: String(_id),
       }));
     }
     return result;
@@ -58,13 +68,17 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
       await solicitud.validate();
     } catch (error) {
       if (error instanceof mongoose.Error.ValidatorError)
-        throw fail(400, "Revisa el campo " + error.path + ". " + (
-          error.path === "cantidadViajeros"
-            ? "Indica una cantidad entera que cubra a los viajeros registrados."
-            : error.path === "regreso"
-              ? "Indica una fecha válida igual o posterior a la salida."
-              : "Introduce un valor válido."
-        ));
+        throw fail(
+          400,
+          "Revisa el campo " +
+            error.path +
+            ". " +
+            (error.path === "cantidadViajeros"
+              ? "Indica una cantidad entera que cubra a los viajeros registrados."
+              : error.path === "regreso"
+                ? "Indica una fecha válida igual o posterior a la salida."
+                : "Introduce un valor válido."),
+        );
       throw error;
     }
   }
@@ -80,13 +94,24 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
         _id: cliente._id,
         ...scope(req),
         solicitudes: {
-          $elemMatch: { _id: solicitud._id, revision: revision === 0 ? { $in: [0, null] } : revision },
+          $elemMatch: {
+            _id: solicitud._id,
+            revision: revision === 0 ? { $in: [0, null] } : revision,
+          },
         },
       },
-      { $set: { "solicitudes.$": solicitud.toObject(), updatedAt: solicitud.updatedAt } },
+      {
+        $set: {
+          "solicitudes.$": solicitud.toObject(),
+          updatedAt: solicitud.updatedAt,
+        },
+      },
     );
     if (!result.matchedCount)
-      throw fail(409, "La solicitud cambió. Recarga el detalle e inténtalo de nuevo.");
+      throw fail(
+        409,
+        "La solicitud cambió. Recarga el detalle e inténtalo de nuevo.",
+      );
   }
 
   app.get("/api/solicitudes", async (req, res) => {
@@ -94,17 +119,19 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
       { $match: { ...scope(req), "solicitudes.0": { $exists: true } } },
       { $unwind: "$solicitudes" },
       { $sort: { "solicitudes.createdAt": -1, "solicitudes._id": -1 } },
-      { $project: {
-        _id: 0,
-        id: { $toString: "$solicitudes._id" },
-        cliente: { id: { $toString: "$_id" }, nombre: "$nombre" },
-        asesor: { $toString: "$asesor" },
-        destino: "$solicitudes.destino",
-        salida: "$solicitudes.salida",
-        regreso: "$solicitudes.regreso",
-        estado: "$solicitudes.estado",
-        cantidadViajeros: "$solicitudes.cantidadViajeros",
-      } },
+      {
+        $project: {
+          _id: 0,
+          id: { $toString: "$solicitudes._id" },
+          cliente: { id: { $toString: "$_id" }, nombre: "$nombre" },
+          asesor: { $toString: "$asesor" },
+          destino: "$solicitudes.destino",
+          salida: "$solicitudes.salida",
+          regreso: "$solicitudes.regreso",
+          estado: "$solicitudes.estado",
+          cantidadViajeros: "$solicitudes.cantidadViajeros",
+        },
+      },
     ]);
     res.json(rows);
   });
@@ -118,12 +145,14 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
     if (!cliente) throw fail(404, "Contacto no encontrado.");
     const now = new Date();
     const solicitud = new Cliente().solicitudes.create({
-      ...requestData(req.body), createdAt: now, updatedAt: now,
+      ...requestData(req.body),
+      createdAt: now,
+      updatedAt: now,
     });
     await validateRequest(solicitud);
-    const result = await Cliente.updateOne(
-      filter, { $push: { solicitudes: solicitud.toObject() } },
-    );
+    const result = await Cliente.updateOne(filter, {
+      $push: { solicitudes: solicitud.toObject() },
+    });
     if (!result.matchedCount) throw fail(404, "Contacto no encontrado.");
     res.status(201).json(requestJson(cliente, solicitud, true));
   });
@@ -148,23 +177,32 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
   app.post("/api/solicitudes/:id/viajeros", validId, async (req, res) => {
     const { cliente, solicitud } = await findRequest(req);
     if (solicitud.viajeros.length >= solicitud.cantidadViajeros)
-      throw fail(409, "Aumenta la cantidad de viajeros de la solicitud para registrar otro.");
+      throw fail(
+        409,
+        "Aumenta la cantidad de viajeros de la solicitud para registrar otro.",
+      );
     const now = new Date();
     solicitud.viajeros.push({
-      ...travelerData(req.body), createdAt: now, updatedAt: now,
+      ...travelerData(req.body),
+      createdAt: now,
+      updatedAt: now,
     });
     await saveRequest(req, cliente, solicitud);
     res.status(201).json(requestJson(cliente, solicitud, true));
   });
 
-  app.put("/api/solicitudes/:id/viajeros/:viajeroId", validId, async (req, res) => {
-    if (!mongoose.isObjectIdOrHexString(req.params.viajeroId))
-      throw fail(400, "Identificador de viajero inválido.");
-    const { cliente, solicitud } = await findRequest(req);
-    const viajero = solicitud.viajeros.id(req.params.viajeroId);
-    if (!viajero) throw fail(404, "Viajero no encontrado.");
-    viajero.set({ ...travelerData(req.body), updatedAt: new Date() });
-    await saveRequest(req, cliente, solicitud);
-    res.json(requestJson(cliente, solicitud, true));
-  });
+  app.put(
+    "/api/solicitudes/:id/viajeros/:viajeroId",
+    validId,
+    async (req, res) => {
+      if (!mongoose.isObjectIdOrHexString(req.params.viajeroId))
+        throw fail(400, "Identificador de viajero inválido.");
+      const { cliente, solicitud } = await findRequest(req);
+      const viajero = solicitud.viajeros.id(req.params.viajeroId);
+      if (!viajero) throw fail(404, "Viajero no encontrado.");
+      viajero.set({ ...travelerData(req.body), updatedAt: new Date() });
+      await saveRequest(req, cliente, solicitud);
+      res.json(requestJson(cliente, solicitud, true));
+    },
+  );
 }

@@ -14,9 +14,15 @@ export default function Solicitudes() {
   useEffect(() => {
     let active = true;
     api("/solicitudes")
-      .then((data) => { if (active) setSolicitudes(data); })
-      .catch((err) => { if (active) setError(err.message); });
-    return () => { active = false; };
+      .then((data) => {
+        if (active) setSolicitudes(data);
+      })
+      .catch((err) => {
+        if (active) setError(err.message);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function nuevaSolicitud() {
@@ -32,19 +38,41 @@ export default function Solicitudes() {
   return (
     <section className="panel">
       <h2>Solicitudes registradas</h2>
-      {!creando && <button className="btn-primary" onClick={nuevaSolicitud}>Nueva solicitud</button>}
+      {!creando && (
+        <button className="btn-primary" onClick={nuevaSolicitud}>
+          Nueva solicitud
+        </button>
+      )}
       {creando && (
         <>
           <h3>Nueva solicitud</h3>
           {errorClientes && <p role="alert">{errorClientes}</p>}
-          {!clientes && !errorClientes && <p role="status">Cargando contactos…</p>}
-          {clientes?.length === 0 && <p>Registra un contacto en <Link to="/clientes">Clientes y prospectos</Link> para continuar.</p>}
+          {!clientes && !errorClientes && (
+            <p role="status">Cargando contactos…</p>
+          )}
+          {clientes?.length === 0 && (
+            <p>
+              Registra un contacto en{" "}
+              <Link to="/clientes">Clientes y prospectos</Link> para continuar.
+            </p>
+          )}
           {clientes?.length > 0 ? (
-            <SolicitudForm clientes={clientes} onCancel={() => setCreando(false)} onSave={async (body) => {
-              const saved = await api("/solicitudes", { method: "POST", body });
-              navigate("/solicitudes/" + saved.id);
-            }} />
-          ) : <button className="btn-secondary" onClick={() => setCreando(false)}>Cerrar</button>}
+            <SolicitudForm
+              clientes={clientes}
+              onCancel={() => setCreando(false)}
+              onSave={async (body) => {
+                const saved = await api("/solicitudes", {
+                  method: "POST",
+                  body,
+                });
+                navigate("/solicitudes/" + saved.id);
+              }}
+            />
+          ) : (
+            <button className="btn-secondary" onClick={() => setCreando(false)}>
+              Cerrar
+            </button>
+          )}
         </>
       )}
       {error && <p role="alert">{error}</p>}
@@ -53,14 +81,27 @@ export default function Solicitudes() {
       {solicitudes?.length > 0 && (
         <div className="tabla-contenedor">
           <table className="tabla-clientes">
-            <thead><tr><th>Destino</th><th>Cliente</th><th>Salida</th><th>Regreso</th><th>Viajeros</th><th>Estado</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Destino</th>
+                <th>Cliente</th>
+                <th>Salida</th>
+                <th>Regreso</th>
+                <th>Viajeros</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
             <tbody>
               {solicitudes.map((solicitud) => (
                 <tr key={solicitud.id}>
-                  <td><Link to={solicitud.id}>{solicitud.destino}</Link></td>
+                  <td>
+                    <Link to={solicitud.id}>{solicitud.destino}</Link>
+                  </td>
                   <td>{solicitud.cliente.nombre}</td>
-                  <td>{solicitud.salida}</td><td>{solicitud.regreso}</td>
-                  <td>{solicitud.cantidadViajeros}</td><td>{solicitud.estado}</td>
+                  <td>{solicitud.salida}</td>
+                  <td>{solicitud.regreso}</td>
+                  <td>{solicitud.cantidadViajeros}</td>
+                  <td>{solicitud.estado}</td>
                 </tr>
               ))}
             </tbody>

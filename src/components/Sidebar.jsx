@@ -76,21 +76,28 @@ function Sidebar() {
           ...(usuario.rol === "Administrador"
             ? [{ ruta: "/usuarios", nombre: "Usuarios", icono: Users }]
             : []),
-        ].filter((seccion) => !seccion.admin || usuario.rol === "Administrador").map((seccion) => {
-          const Icono = seccion.icono;
+        ]
+          .filter(
+            (seccion) => !seccion.admin || usuario.rol === "Administrador",
+          )
+          .map((seccion) => {
+            const Icono = seccion.icono;
 
-          return (
-            <NavLink
-              key={seccion.ruta}
-              to={seccion.ruta}
-              end={seccion.ruta === "/oportunidades" && usuario.rol === "Administrador"}
-              className={({ isActive }) => (isActive ? "activo" : "")}
-            >
-              <Icono size={19} aria-hidden="true" />
-              <span>{seccion.nombre}</span>
-            </NavLink>
-          );
-        })}
+            return (
+              <NavLink
+                key={seccion.ruta}
+                to={seccion.ruta}
+                end={
+                  seccion.ruta === "/oportunidades" &&
+                  usuario.rol === "Administrador"
+                }
+                className={({ isActive }) => (isActive ? "activo" : "")}
+              >
+                <Icono size={19} aria-hidden="true" />
+                <span>{seccion.nombre}</span>
+              </NavLink>
+            );
+          })}
       </nav>
 
       <div className="sidebar-footer">

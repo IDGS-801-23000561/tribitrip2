@@ -10,17 +10,25 @@ function Etapas({ query }) {
   if (!grupos) return <p role="status">Cargando embudo…</p>;
   return (
     <>
-      {grupos.every(({ cantidad }) => cantidad === 0) && <p>No hay oportunidades para estos filtros.</p>}
+      {grupos.every(({ cantidad }) => cantidad === 0) && (
+        <p>No hay oportunidades para estos filtros.</p>
+      )}
       <div className="embudo">
         {grupos.map(({ etapa, cantidad, oportunidades }) => (
           <section className="embudo-etapa" key={etapa}>
-            <h3>{etapa} ({cantidad})</h3>
-            {cantidad === 0 ? <p>Sin oportunidades</p> : (
+            <h3>
+              {etapa} ({cantidad})
+            </h3>
+            {cantidad === 0 ? (
+              <p>Sin oportunidades</p>
+            ) : (
               <ul>
                 {oportunidades.map(({ id, titulo, cliente, asesor }) => (
                   <li key={id}>
                     <Link to={"/oportunidades/" + id}>{titulo}</Link>
-                    <small>{cliente?.nombre} · {asesor?.nombre}</small>
+                    <small>
+                      {cliente?.nombre} · {asesor?.nombre}
+                    </small>
                   </li>
                 ))}
               </ul>
@@ -49,24 +57,44 @@ export default function Embudo() {
       <div className="account-form">
         <label>
           Asesor responsable
-          <select value={params.get("asesor") || ""} disabled={!usuarios} onChange={(event) => filter("asesor", event.target.value)}>
+          <select
+            value={params.get("asesor") || ""}
+            disabled={!usuarios}
+            onChange={(event) => filter("asesor", event.target.value)}
+          >
             <option value="">Todos los responsables</option>
-            {usuarios?.map(({ id, nombre }) => <option key={id} value={id}>{nombre}</option>)}
+            {usuarios?.map(({ id, nombre }) => (
+              <option key={id} value={id}>
+                {nombre}
+              </option>
+            ))}
           </select>
         </label>
         {error && <p role="alert">{error}</p>}
         <label>
           Estado
-          <select value={params.get("estado") || ""} onChange={(event) => filter("estado", event.target.value)}>
+          <select
+            value={params.get("estado") || ""}
+            onChange={(event) => filter("estado", event.target.value)}
+          >
             <option value="">Todos los estados</option>
-            {estados.map((estado) => <option key={estado}>{estado}</option>)}
+            {estados.map((estado) => (
+              <option key={estado}>{estado}</option>
+            ))}
           </select>
         </label>
       </div>
-      <button type="button" className="btn-secondary" onClick={() => setRefresh((value) => value + 1)}>
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setRefresh((value) => value + 1)}
+      >
         Actualizar embudo
       </button>
-      <Etapas key={params.toString() + ":" + refresh} query={params.toString()} />
+      <Etapas
+        key={params.toString() + ":" + refresh}
+        query={params.toString()}
+      />
     </section>
   );
 }

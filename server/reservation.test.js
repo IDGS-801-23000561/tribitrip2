@@ -12,36 +12,84 @@ import { tokenHash } from "./security.js";
 const oid = () => new mongoose.Types.ObjectId();
 const folio = (prefix, id = oid()) => prefix + "-" + String(id).toUpperCase();
 const commercial = {
-  conceptos: [{ _id: oid(), descripcion: "Traslado", cantidad: 2, precioUnitarioCentavos: 5000, subtotalCentavos: 10000 }],
-  subtotalCentavos: 10000, impuestosCentavos: 1200, cargosCentavos: 100, totalCentavos: 11300,
-  condiciones: "Según lo convenido", observaciones: "Llegada por la mañana",
+  conceptos: [
+    {
+      _id: oid(),
+      descripcion: "Traslado",
+      cantidad: 2,
+      precioUnitarioCentavos: 5000,
+      subtotalCentavos: 10000,
+    },
+  ],
+  subtotalCentavos: 10000,
+  impuestosCentavos: 1200,
+  cargosCentavos: 100,
+  totalCentavos: 11300,
+  condiciones: "Según lo convenido",
+  observaciones: "Llegada por la mañana",
   clienteDocumento: { nombre: "Contacto al aceptar" },
 };
-const dates = { destino: "Mérida", salida: "2032-06-01", regreso: "2032-06-05" };
+const dates = {
+  destino: "Mérida",
+  salida: "2032-06-01",
+  regreso: "2032-06-05",
+};
 const todayPayment = () => ({
-  clave: randomUUID(), fecha: "2020-02-29", monto: "30.00",
-  metodo: "Transferencia informada", referencia: "REF-01", observaciones: "Reportado por el cliente",
+  clave: randomUUID(),
+  fecha: "2020-02-29",
+  monto: "30.00",
+  metodo: "Transferencia informada",
+  referencia: "REF-01",
+  observaciones: "Reportado por el cliente",
 });
 
 test("modelo valida fechas, origen e importes y deriva el monto pagado", async () => {
   const opts = {
-    ...commercial, ...dates, folio: folio("RES"), folioCotizacion: folio("COT"),
-    vigenciaCotizacion: "2032-05-01", versionAceptada: 2, cliente: oid(), oportunidad: oid(),
-    solicitud: oid(), cotizacion: oid(), asesor: oid(), registradaPor: oid(), estadoActualizadoPor: oid(),
+    ...commercial,
+    ...dates,
+    folio: folio("RES"),
+    folioCotizacion: folio("COT"),
+    vigenciaCotizacion: "2032-05-01",
+    versionAceptada: 2,
+    cliente: oid(),
+    oportunidad: oid(),
+    solicitud: oid(),
+    cotizacion: oid(),
+    asesor: oid(),
+    registradaPor: oid(),
+    estadoActualizadoPor: oid(),
   };
-  const payment = { ...todayPayment(), montoCentavos: 3000, registradoPor: oid() };
+  const payment = {
+    ...todayPayment(),
+    montoCentavos: 3000,
+    registradoPor: oid(),
+  };
   const reserva = new Reserva({ ...opts, pagos: [payment] });
   await reserva.validate();
   assert.equal(reserva.estado, "Pendiente de pago");
   assert.equal(reserva.pagadoCentavos, 3000);
   for (const invalid of [
-    { estado: "Otro" }, { cliente: null }, { versionAceptada: 1.5 }, { regreso: "2032-05-31" },
-    { totalCentavos: 0 }, { conceptos: [] }, { folio: "otro" },
-    { pagos: [{ ...payment, referencia: "" }] }, { pagos: [{ ...payment, clave: "mal" }] },
-    { pagos: [{ ...payment, fecha: "2999-01-01" }] }, { pagos: [{ ...payment, montoCentavos: 11.1 }] },
-    { pagos: [payment, { ...payment, clave: randomUUID(), referencia: "  ref-01 " }] },
+    { estado: "Otro" },
+    { cliente: null },
+    { versionAceptada: 1.5 },
+    { regreso: "2032-05-31" },
+    { totalCentavos: 0 },
+    { conceptos: [] },
+    { folio: "otro" },
+    { pagos: [{ ...payment, referencia: "" }] },
+    { pagos: [{ ...payment, clave: "mal" }] },
+    { pagos: [{ ...payment, fecha: "2999-01-01" }] },
+    { pagos: [{ ...payment, montoCentavos: 11.1 }] },
+    {
+      pagos: [
+        payment,
+        { ...payment, clave: randomUUID(), referencia: "  ref-01 " },
+      ],
+    },
   ]) {
-    await assert.rejects(new Reserva({ ...opts, ...invalid }).validate(), { name: "ValidationError" });
+    await assert.rejects(new Reserva({ ...opts, ...invalid }).validate(), {
+      name: "ValidationError",
+    });
   }
 });
 
@@ -51,49 +99,90 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
     ajeno: { _id: oid(), rol: "Asesor", activo: true },
     admin: { _id: oid(), rol: "Administrador", activo: true },
   };
-  const clients = Object.values(users).slice(0, 2).map(({ _id }) => ({
-    _id: oid(), nombre: "Contacto", asesor: _id, solicitudes: [{ _id: oid(), ...dates }],
-  }));
+  const clients = Object.values(users)
+    .slice(0, 2)
+    .map(({ _id }) => ({
+      _id: oid(),
+      nombre: "Contacto",
+      asesor: _id,
+      solicitudes: [{ _id: oid(), ...dates }],
+    }));
   const opportunities = clients.map((client) => ({
-    _id: oid(), cliente: client._id, solicitud: client.solicitudes[0]._id, asesor: client.asesor, etapa: "Ganada",
+    _id: oid(),
+    cliente: client._id,
+    solicitud: client.solicitudes[0]._id,
+    asesor: client.asesor,
+    etapa: "Ganada",
   }));
   const quotes = opportunities.map((op) => ({
-    ...commercial, _id: oid(), cliente: op.cliente, oportunidad: op._id, asesor: op.asesor,
-    version: 2, versionAceptada: 2, estado: "Aceptada", folio: folio("COT"), vigencia: "2032-05-01",
+    ...commercial,
+    _id: oid(),
+    cliente: op.cliente,
+    oportunidad: op._id,
+    asesor: op.asesor,
+    version: 2,
+    versionAceptada: 2,
+    estado: "Aceptada",
+    folio: folio("COT"),
+    vigencia: "2032-05-01",
   }));
   const reservas = [];
   function matches(row, filter) {
     return Object.entries(filter).every(([field, value]) => {
-      if (field === "solicitudes._id") return row.solicitudes.some(({ _id }) => _id.equals(value));
-      if (row[field] instanceof mongoose.Types.ObjectId) return row[field].equals(value);
+      if (field === "solicitudes._id")
+        return row.solicitudes.some(({ _id }) => _id.equals(value));
+      if (row[field] instanceof mongoose.Types.ObjectId)
+        return row[field].equals(value);
       return row[field] === value;
     });
   }
   const find = (rows, filter) => rows.find((row) => matches(row, filter));
   t.mock.method(Sesion, "findOne", ({ token }) => ({
-    populate: async () => ({ usuario: Object.entries(users).find(([key]) => tokenHash(key) === token)?.[1] }),
+    populate: async () => ({
+      usuario: Object.entries(users).find(
+        ([key]) => tokenHash(key) === token,
+      )?.[1],
+    }),
   }));
-  t.mock.method(Cliente, "findOne", (filter) => ({ select: () => ({ lean: async () => find(clients, filter) }) }));
+  t.mock.method(Cliente, "findOne", (filter) => ({
+    select: () => ({ lean: async () => find(clients, filter) }),
+  }));
   t.mock.method(Cliente, "exists", async (filter) => find(clients, filter));
-  t.mock.method(Cotizacion, "findOne", (filter) => ({ select: () => ({ lean: async () => find(quotes, filter) }) }));
+  t.mock.method(Cotizacion, "findOne", (filter) => ({
+    select: () => ({ lean: async () => find(quotes, filter) }),
+  }));
   t.mock.method(Cotizacion, "exists", async (filter) => find(quotes, filter));
-  t.mock.method(Oportunidad, "findOne", (filter) => ({ lean: async () => find(opportunities, filter) }));
+  t.mock.method(Oportunidad, "findOne", (filter) => ({
+    lean: async () => find(opportunities, filter),
+  }));
   t.mock.method(Reserva, "findOne", (filter) => {
     const row = find(reservas, filter);
     return {
-      select() { return this; },
+      select() {
+        return this;
+      },
       lean: async () => row,
-      then(resolve) { return Promise.resolve(row ? Reserva.hydrate(row) : null).then(resolve); },
+      then(resolve) {
+        return Promise.resolve(row ? Reserva.hydrate(row) : null).then(resolve);
+      },
     };
   });
   t.mock.method(Reserva, "find", (filter) => ({
-    select() { return this; }, sort() { return this; },
-    lean: async () => reservas.filter((row) => matches(row, filter)).map((row) => {
-      const copy = { ...row };
-      delete copy.pagos;
-      delete copy.conceptos;
-      return copy;
-    }),
+    select() {
+      return this;
+    },
+    sort() {
+      return this;
+    },
+    lean: async () =>
+      reservas
+        .filter((row) => matches(row, filter))
+        .map((row) => {
+          const copy = { ...row };
+          delete copy.pagos;
+          delete copy.conceptos;
+          return copy;
+        }),
   }));
   t.mock.method(Reserva.collection, "insertOne", async (row) => {
     if (find(reservas, { cotizacion: row.cotizacion }))
@@ -116,23 +205,38 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   await new Promise((resolve) => server.once("listening", resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   async function call(path, session, method = "GET", body) {
-    const headers = { Origin: process.env.APP_ORIGIN || "http://localhost:5173" };
+    const headers = {
+      Origin: process.env.APP_ORIGIN || "http://localhost:5173",
+    };
     if (session) headers.Cookie = "session=" + session;
     if (body) headers["Content-Type"] = "application/json";
-    const response = await fetch("http://127.0.0.1:" + server.address().port + "/api" + path, {
-      method, headers, body: body ? JSON.stringify(body) : undefined,
-    });
+    const response = await fetch(
+      "http://127.0.0.1:" + server.address().port + "/api" + path,
+      {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      },
+    );
     return { status: response.status, body: await response.json() };
   }
 
   const quote = quotes[0];
-  const creation = { cotizacion: String(quote._id), localizador: "ABC-123", totalCentavos: 1 };
-  const create = (session, body = creation) => call("/reservas", session, "POST", body);
+  const creation = {
+    cotizacion: String(quote._id),
+    localizador: "ABC-123",
+    totalCentavos: 1,
+  };
+  const create = (session, body = creation) =>
+    call("/reservas", session, "POST", body);
   assert.equal((await call("/reservas")).status, 401);
   assert.equal((await create(null)).status, 401);
   assert.equal((await create("ajeno")).status, 404);
   assert.equal((await create("propio", { cotizacion: "mal" })).status, 400);
-  assert.equal((await create("propio", { cotizacion: String(oid()) })).status, 404);
+  assert.equal(
+    (await create("propio", { cotizacion: String(oid()) })).status,
+    404,
+  );
   for (const state of ["Borrador", "Vencida", "Rechazada", "Enviada"]) {
     quote.estado = state;
     assert.equal((await create("propio")).status, 409);
@@ -157,7 +261,15 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal((await call(linked, "propio")).body, null);
   const created = await Promise.all([create("propio"), create("admin")]);
   assert.deepEqual(created.map(({ status }) => status).sort(), [200, 201]);
-  const { id, folio: resultFolio, versionAceptada, totalCentavos, asesor, clienteDocumento, localizador } = created[0].body;
+  const {
+    id,
+    folio: resultFolio,
+    versionAceptada,
+    totalCentavos,
+    asesor,
+    clienteDocumento,
+    localizador,
+  } = created[0].body;
   assert.equal(created[1].body.id, id);
   assert.equal(resultFolio, folio("RES", id));
   assert.equal(versionAceptada, 2);
@@ -165,7 +277,11 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal(asesor, String(quote.asesor));
   assert.equal(clienteDocumento.nombre, commercial.clienteDocumento.nombre);
   assert.equal(localizador, "ABC-123");
-  assert.equal((await create("propio", { ...creation, localizador: "No sustituye" })).body.localizador, "ABC-123");
+  assert.equal(
+    (await create("propio", { ...creation, localizador: "No sustituye" })).body
+      .localizador,
+    "ABC-123",
+  );
   const other = await create("admin", { cotizacion: String(quotes[1]._id) });
   assert.notEqual(other.body.folio, resultFolio);
 
@@ -180,29 +296,52 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal((await call(linked, "ajeno")).status, 404);
   assert.equal((await call(path, "ajeno")).status, 404);
   assert.equal((await call("/reservas?estado=Otro", "admin")).status, 400);
-  assert.equal((await call("/reservas?estado=Pendiente%20de%20pago", "propio")).body.length, 1);
+  assert.equal(
+    (await call("/reservas?estado=Pendiente%20de%20pago", "propio")).body
+      .length,
+    1,
+  );
   assert.equal((await call("/reservas", "admin")).body.length, 2);
-  assert.equal((await call("/clientes/" + clients[0]._id + "/reservas", "propio")).body[0].id, id);
-  assert.equal((await call("/clientes/" + clients[0]._id + "/reservas", "ajeno")).status, 404);
+  assert.equal(
+    (await call("/clientes/" + clients[0]._id + "/reservas", "propio")).body[0]
+      .id,
+    id,
+  );
+  assert.equal(
+    (await call("/clientes/" + clients[0]._id + "/reservas", "ajeno")).status,
+    404,
+  );
 
   const state = (estado, revision, session = "propio", url = path) =>
     call(url + "/estado", session, "PATCH", { estado, revision });
   assert.equal((await state("Confirmada", 0, "ajeno")).status, 404);
   assert.equal((await state("Otra", 0)).status, 400);
   assert.equal((await state("Completada", 0)).status, 409);
-  assert.equal((await state("Confirmada", 0, "admin")).body.estado, "Confirmada");
+  assert.equal(
+    (await state("Confirmada", 0, "admin")).body.estado,
+    "Confirmada",
+  );
   assert.equal((await state("En viaje", 0)).status, 409);
   const locator = await call(path + "/estado", "propio", "PATCH", {
-    revision: 1, localizador: "NUEVO", proveedorReferencia: "Proveedor manual",
+    revision: 1,
+    localizador: "NUEVO",
+    proveedorReferencia: "Proveedor manual",
   });
   assert.equal(locator.body.localizador, "NUEVO");
   assert.equal(locator.body.proveedorReferencia, "Proveedor manual");
 
   const payment = todayPayment();
-  const pay = (body, session = "propio", url = payments) => call(url, session, "POST", body);
+  const pay = (body, session = "propio", url = payments) =>
+    call(url, session, "POST", body);
   assert.equal((await call(payments, "ajeno")).status, 404);
   assert.equal((await pay(payment, "ajeno")).status, 404);
-  for (const invalid of [{ fecha: "2021-02-29" }, { monto: "0" }, { monto: "1.005" }, { referencia: "" }, { clave: 7 }])
+  for (const invalid of [
+    { fecha: "2021-02-29" },
+    { monto: "0" },
+    { monto: "1.005" },
+    { referencia: "" },
+    { clave: 7 },
+  ])
     assert.equal((await pay({ ...payment, ...invalid })).status, 400);
   const same = await Promise.all([pay(payment), pay(payment)]);
   assert.deepEqual(same.map(({ status }) => status).sort(), [200, 201]);
@@ -211,10 +350,24 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal(same[0].body.saldoCentavos, 8300);
   assert.equal(same[0].body.pagos[0].registradoPor, String(users.propio._id));
   assert.equal((await pay({ ...payment, monto: "1.00" })).status, 409);
-  assert.equal((await pay({ ...payment, clave: randomUUID(), referencia: "ref-01" })).status, 409);
+  assert.equal(
+    (await pay({ ...payment, clave: randomUUID(), referencia: "ref-01" }))
+      .status,
+    409,
+  );
   const concurrent = await Promise.all([
-    pay({ ...payment, clave: randomUUID(), monto: "50.00", referencia: "REF-02" }),
-    pay({ ...payment, clave: randomUUID(), monto: "50.00", referencia: "REF-03" }),
+    pay({
+      ...payment,
+      clave: randomUUID(),
+      monto: "50.00",
+      referencia: "REF-02",
+    }),
+    pay({
+      ...payment,
+      clave: randomUUID(),
+      monto: "50.00",
+      referencia: "REF-03",
+    }),
   ]);
   assert.deepEqual(concurrent.map(({ status }) => status).sort(), [201, 201]);
   const balance = (await call(payments, "admin")).body;
@@ -227,11 +380,19 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal((await state("Cancelada", travelling.revision)).status, 409);
   const done = await state("Completada", travelling.revision);
   assert.equal(done.body.estado, "Completada");
-  const extra = await pay({ ...payment, clave: randomUUID(), monto: "33.00", referencia: "REF-04" });
+  const extra = await pay({
+    ...payment,
+    clave: randomUUID(),
+    monto: "33.00",
+    referencia: "REF-04",
+  });
   assert.equal(extra.status, 201);
   assert.equal(extra.body.saldoCentavos, 0);
   assert.equal(extra.body.excedenteCentavos, 5000);
   const otherPath = "/reservas/" + other.body.id;
   assert.equal((await state("Cancelada", 0, "admin", otherPath)).status, 200);
-  assert.equal((await pay(todayPayment(), "admin", otherPath + "/pagos")).status, 409);
+  assert.equal(
+    (await pay(todayPayment(), "admin", otherPath + "/pagos")).status,
+    409,
+  );
 });

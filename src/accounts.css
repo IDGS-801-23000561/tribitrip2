@@ -59,7 +59,8 @@
   align-items: center;
 }
 
-.account-form.formulario-grid :is(input:not([type="checkbox"]), select, textarea) {
+.account-form.formulario-grid
+  :is(input:not([type="checkbox"]), select, textarea) {
   padding: 11px 13px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;

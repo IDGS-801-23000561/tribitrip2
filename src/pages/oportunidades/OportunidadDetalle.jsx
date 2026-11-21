@@ -19,10 +19,12 @@ function Detalle({ id }) {
     setBusy(true);
     setError("");
     try {
-      setUpdated(await api(path, {
-        method: "PUT",
-        body: { ...fields, revision: oportunidad.revision },
-      }));
+      setUpdated(
+        await api(path, {
+          method: "PUT",
+          body: { ...fields, revision: oportunidad.revision },
+        }),
+      );
       setEditing(false);
     } catch (err) {
       setError(err.message);
@@ -33,42 +35,86 @@ function Detalle({ id }) {
 
   return (
     <section className="panel">
-      <Link className="btn-secondary" to="/oportunidades">Volver a oportunidades</Link>
+      <Link className="btn-secondary" to="/oportunidades">
+        Volver a oportunidades
+      </Link>
       {loadError && <p role="alert">{loadError}</p>}
       {!oportunidad && !loadError && <p role="status">Cargando oportunidad…</p>}
       {oportunidad && (
         <>
           <h2>{oportunidad.titulo}</h2>
           <dl>
-            <dt>Cliente</dt><dd>{oportunidad.cliente?.nombre ?? "—"}</dd>
-            <dt>Responsable</dt><dd>{oportunidad.asesor?.nombre ?? "—"}</dd>
-            <dt>Solicitud</dt><dd><Link to={"/solicitudes/" + oportunidad.solicitud}>Consultar solicitud de viaje</Link></dd>
-            <dt>Etapa</dt><dd>{oportunidad.etapa}</dd>
-            <dt>Resultado</dt><dd>{oportunidad.resultado ?? "Abierta"}</dd>
+            <dt>Cliente</dt>
+            <dd>{oportunidad.cliente?.nombre ?? "—"}</dd>
+            <dt>Responsable</dt>
+            <dd>{oportunidad.asesor?.nombre ?? "—"}</dd>
+            <dt>Solicitud</dt>
+            <dd>
+              <Link to={"/solicitudes/" + oportunidad.solicitud}>
+                Consultar solicitud de viaje
+              </Link>
+            </dd>
+            <dt>Etapa</dt>
+            <dd>{oportunidad.etapa}</dd>
+            <dt>Resultado</dt>
+            <dd>{oportunidad.resultado ?? "Abierta"}</dd>
             {oportunidad.cerradaEn && (
-              <><dt>Fecha de cierre</dt><dd>{new Date(oportunidad.cerradaEn).toLocaleString("es-MX")}</dd></>
+              <>
+                <dt>Fecha de cierre</dt>
+                <dd>
+                  {new Date(oportunidad.cerradaEn).toLocaleString("es-MX")}
+                </dd>
+              </>
             )}
           </dl>
-          <Link className="btn-secondary" to={"/cotizaciones?oportunidad=" + id}>Consultar cotizaciones</Link>
+          <Link
+            className="btn-secondary"
+            to={"/cotizaciones?oportunidad=" + id}
+          >
+            Consultar cotizaciones
+          </Link>
           {editing ? (
             <form className="account-form formulario-grid" onSubmit={submit}>
-              <label>Título<input name="titulo" required maxLength={120} defaultValue={oportunidad.titulo} /></label>
+              <label>
+                Título
+                <input
+                  name="titulo"
+                  required
+                  maxLength={120}
+                  defaultValue={oportunidad.titulo}
+                />
+              </label>
               <label>
                 Etapa
                 <select name="etapa" defaultValue={oportunidad.etapa}>
-                  {etapas.map((etapa) => <option key={etapa}>{etapa}</option>)}
+                  {etapas.map((etapa) => (
+                    <option key={etapa}>{etapa}</option>
+                  ))}
                 </select>
               </label>
               {error && <p role="alert">{error}</p>}
               <div className="formulario-acciones">
-                <button type="button" className="btn-secondary" disabled={busy} onClick={() => {
-                  setEditing(false);
-                  setError("");
-                }}>Cancelar</button>
-                <button className="btn-primary" disabled={busy}>{busy ? "Guardando…" : "Guardar cambios"}</button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    setEditing(false);
+                    setError("");
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button className="btn-primary" disabled={busy}>
+                  {busy ? "Guardando…" : "Guardar cambios"}
+                </button>
               </div>
             </form>
-          ) : <button className="btn-primary" onClick={() => setEditing(true)}>Editar oportunidad</button>}
+          ) : (
+            <button className="btn-primary" onClick={() => setEditing(true)}>
+              Editar oportunidad
+            </button>
+          )}
         </>
       )}
     </section>
