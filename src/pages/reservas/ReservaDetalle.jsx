@@ -42,7 +42,7 @@ function Detalle({ id }) {
   return (
     <>
       <section className="panel">
-        <Link to="/reservas">Volver a reservas</Link>
+        <Link className="btn-secondary" to="/reservas">Volver a reservas</Link>
         {loadError && <p role="alert">{loadError}</p>}
         {!reserva && !loadError && <p role="status">Cargando reserva…</p>}
         {reserva && (
@@ -62,8 +62,8 @@ function Detalle({ id }) {
               <dt>Proveedor de referencia</dt><dd>{reserva.proveedorReferencia || "—"}</dd>
             </dl>
             {editing ? (
-              <form className="account-form" onSubmit={submit}>
-                <label>
+              <form className="account-form formulario-grid" onSubmit={submit}>
+                <label className="campo-ancho">
                   Nuevo estado
                   <select value={estado} onChange={(event) => setEstado(event.target.value)}>
                     <option value="">Conservar estado actual</option>

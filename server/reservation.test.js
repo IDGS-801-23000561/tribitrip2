@@ -39,7 +39,6 @@ test("modelo valida fechas, origen e importes y deriva el monto pagado", async (
     { totalCentavos: 0 }, { conceptos: [] }, { folio: "otro" },
     { pagos: [{ ...payment, referencia: "" }] }, { pagos: [{ ...payment, clave: "mal" }] },
     { pagos: [{ ...payment, fecha: "2999-01-01" }] }, { pagos: [{ ...payment, montoCentavos: 11.1 }] },
-    { pagos: [{ ...payment, montoCentavos: 11301 }] },
     { pagos: [payment, { ...payment, clave: randomUUID(), referencia: "  ref-01 " }] },
   ]) {
     await assert.rejects(new Reserva({ ...opts, ...invalid }).validate(), { name: "ValidationError" });
@@ -205,7 +204,6 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal((await pay(payment, "ajeno")).status, 404);
   for (const invalid of [{ fecha: "2021-02-29" }, { monto: "0" }, { monto: "1.005" }, { referencia: "" }, { clave: 7 }])
     assert.equal((await pay({ ...payment, ...invalid })).status, 400);
-  assert.equal((await pay({ ...payment, monto: "113.01" })).status, 409);
   const same = await Promise.all([pay(payment), pay(payment)]);
   assert.deepEqual(same.map(({ status }) => status).sort(), [200, 201]);
   assert.equal(same[0].body.pagos.length, 1);
@@ -218,17 +216,21 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
     pay({ ...payment, clave: randomUUID(), monto: "50.00", referencia: "REF-02" }),
     pay({ ...payment, clave: randomUUID(), monto: "50.00", referencia: "REF-03" }),
   ]);
-  assert.deepEqual(concurrent.map(({ status }) => status).sort(), [201, 409]);
+  assert.deepEqual(concurrent.map(({ status }) => status).sort(), [201, 201]);
   const balance = (await call(payments, "admin")).body;
-  assert.equal(balance.pagadoCentavos, 8000);
-  assert.equal(balance.saldoCentavos, 3300);
-  assert.equal(balance.pagos.length, 2);
+  assert.equal(balance.pagadoCentavos, 13000);
+  assert.equal(balance.saldoCentavos, 0);
+  assert.equal(balance.pagos.length, 3);
+  assert.equal(balance.excedenteCentavos, 1700);
   const travelling = (await state("En viaje", balance.revision)).body;
   assert.equal(travelling.estado, "En viaje");
   assert.equal((await state("Cancelada", travelling.revision)).status, 409);
   const done = await state("Completada", travelling.revision);
   assert.equal(done.body.estado, "Completada");
-  assert.equal((await pay({ ...payment, clave: randomUUID(), monto: "33.00", referencia: "REF-04" })).body.saldoCentavos, 0);
+  const extra = await pay({ ...payment, clave: randomUUID(), monto: "33.00", referencia: "REF-04" });
+  assert.equal(extra.status, 201);
+  assert.equal(extra.body.saldoCentavos, 0);
+  assert.equal(extra.body.excedenteCentavos, 5000);
   const otherPath = "/reservas/" + other.body.id;
   assert.equal((await state("Cancelada", 0, "admin", otherPath)).status, 200);
   assert.equal((await pay(todayPayment(), "admin", otherPath + "/pagos")).status, 409);

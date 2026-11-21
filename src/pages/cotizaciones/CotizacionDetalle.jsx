@@ -48,7 +48,7 @@ function Detalle({ id }) {
 
   return (
     <section className="panel">
-      <Link to="/cotizaciones">Volver a cotizaciones</Link>
+      <Link className="btn-secondary" to="/cotizaciones">Volver a cotizaciones</Link>
       {error && <p role="alert">{error}</p>}
       {!quote && !error && <p role="status">Cargando cotización…</p>}
       {quote && (
@@ -105,8 +105,8 @@ function Detalle({ id }) {
                 <dt>Observaciones</dt><dd>{quote.observaciones || "—"}</dd>
               </dl>
               <div className="formulario-acciones">
-                <Link to={preview(quote.version)}>Ver documento imprimible</Link>
-                {quote.estado === "Aceptada" && <Link to={"/reservas/nueva?cotizacion=" + id}>Registrar o consultar reserva</Link>}
+                <Link className="btn-secondary" to={preview(quote.version)}>Ver documento imprimible</Link>
+                {quote.estado === "Aceptada" && <Link className="btn-primary" to={"/reservas/nueva?cotizacion=" + id}>Registrar o consultar reserva</Link>}
                 {quote.estado !== "Aceptada" && !pending && (
                   <button type="button" className="btn-primary" onClick={() => {
                     setNotice("");

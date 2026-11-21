@@ -34,7 +34,7 @@ export default function Reportes() {
     <>
       <section className="panel">
         <h2>Reportes comerciales</h2>
-        <form className="account-form" key={params.toString()} onSubmit={submit}>
+        <form className="account-form formulario-grid" key={params.toString()} onSubmit={submit}>
           <label>Desde<input type="date" name="desde" required defaultValue={params.get("desde") ?? today.slice(0, 7) + "-01"} /></label>
           <label>Hasta<input type="date" name="hasta" required defaultValue={params.get("hasta") ?? today} /></label>
           <button className="btn-primary">Consultar periodo</button>

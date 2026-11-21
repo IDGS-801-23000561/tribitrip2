@@ -70,17 +70,20 @@ export function registerTravelRoutes(app, { scope, fail, validId }) {
   }
 
   async function saveRequest(req, cliente, solicitud) {
-    const revision = solicitud.revision;
-    solicitud.revision += 1;
+    const revision = solicitud.revision ?? 0;
+    solicitud.revision = revision + 1;
     solicitud.updatedAt = new Date();
     await validateRequest(solicitud);
-    const result = await Cliente.updateOne(
+    // La solicitud ya fue validada. El middleware agregaria una escritura anidada al reemplazo.
+    const result = await Cliente.collection.updateOne(
       {
         _id: cliente._id,
         ...scope(req),
-        solicitudes: { $elemMatch: { _id: solicitud._id, revision } },
+        solicitudes: {
+          $elemMatch: { _id: solicitud._id, revision: revision === 0 ? { $in: [0, null] } : revision },
+        },
       },
-      { $set: { "solicitudes.$": solicitud.toObject() } },
+      { $set: { "solicitudes.$": solicitud.toObject(), updatedAt: solicitud.updatedAt } },
     );
     if (!result.matchedCount)
       throw fail(409, "La solicitud cambió. Recarga el detalle e inténtalo de nuevo.");

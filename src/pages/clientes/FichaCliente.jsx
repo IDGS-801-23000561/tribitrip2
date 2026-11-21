@@ -18,7 +18,7 @@ export default function FichaCliente({ ficha, onEdit, busy }) {
   return (
     <>
       <section className="panel">
-        <Link to="/clientes">Volver a clientes y prospectos</Link>
+        <Link className="btn-secondary" to="/clientes">Volver a clientes y prospectos</Link>
         <h2>{cliente.nombre}</h2>
         <dl>
           <dt>Estado</dt><dd>{cliente.estado}</dd>

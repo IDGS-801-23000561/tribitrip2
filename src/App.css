@@ -217,6 +217,85 @@
   font-size: 17px;
 }
 
+.oportunidades-grafica {
+  display: grid;
+  gap: 18px;
+}
+
+.oportunidades-grafica header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.oportunidades-grafica header span,
+.oportunidades-grafica p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.oportunidades-barra {
+  display: flex;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.oportunidades-barra > span {
+  flex-basis: 0;
+}
+
+.oportunidades-grafica [data-etapa="abiertas"] {
+  background: #2563eb;
+}
+
+.oportunidades-grafica [data-etapa="ganadas"] {
+  background: #047857;
+}
+
+.oportunidades-grafica [data-etapa="perdidas"] {
+  background: #b45309;
+}
+
+.oportunidades-leyenda {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.oportunidades-leyenda li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.oportunidades-marca {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.oportunidades-leyenda strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.oportunidades-porcentaje {
+  grid-column: 2 / -1;
+  color: #475569;
+  font-size: 13px;
+}
+
 .estado-vacio {
   padding: 45px 15px;
   text-align: center;

@@ -16,9 +16,9 @@ export default function Cotizaciones() {
     <section className="panel">
       <h2>{oportunidad ? "Cotizaciones de la oportunidad" : "Cotizaciones registradas"}</h2>
       <div className="formulario-acciones">
-        <Link to={oportunidad ? "nueva?oportunidad=" + encodeURIComponent(oportunidad) : "nueva"}>Nueva cotización</Link>
-        <Link to="catalogo">Catálogo de servicios</Link>
-        {oportunidad && <Link to="/cotizaciones">Ver todas</Link>}
+        <Link className="btn-primary" to={oportunidad ? "nueva?oportunidad=" + encodeURIComponent(oportunidad) : "nueva"}>Nueva cotización</Link>
+        <Link className="btn-secondary" to="catalogo">Catálogo de servicios</Link>
+        {oportunidad && <Link className="btn-secondary" to="/cotizaciones">Ver todas</Link>}
       </div>
       <ListFilters list={list} searchLabel="Folio de cotización" selects={[
         { name: "estado", label: "Estado", options: filterOptions(["Borrador", "Enviada", "Aceptada", "Rechazada", "Vencida"]) },

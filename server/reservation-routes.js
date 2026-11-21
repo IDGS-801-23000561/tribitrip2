@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { aCentavos } from "../shared/cotizaciones.js";
+import { aCentavos, maxCentavos } from "../shared/cotizaciones.js";
 import { Cliente } from "./models.js";
 import { Oportunidad } from "./opportunity-model.js";
 import { Cotizacion } from "./quote-models.js";
@@ -15,15 +15,21 @@ function paymentSummary(reserva) {
   const { totalCentavos, pagadoCentavos, revision } = reserva;
   const pagos = [...reserva.pagos].sort((a, b) =>
     b.fecha.localeCompare(a.fecha) || new Date(b.registradoEn) - new Date(a.registradoEn));
-  return { revision, totalCentavos, pagadoCentavos, saldoCentavos: totalCentavos - pagadoCentavos, pagos };
+  return { revision, totalCentavos, pagadoCentavos, ...saldos(totalCentavos, pagadoCentavos), pagos };
+}
+
+function saldos(totalCentavos, pagadoCentavos) {
+  return {
+    saldoCentavos: Math.max(0, totalCentavos - pagadoCentavos),
+    excedenteCentavos: Math.max(0, pagadoCentavos - totalCentavos),
+  };
 }
 
 function reservaJson({ _id, pagos, clienteDocumento, ...reserva }) {
   return {
     id: String(_id), ...reserva, clienteDocumento,
     transiciones: transicionesReserva[reserva.estado],
-    saldoCentavos: reserva.totalCentavos - reserva.pagadoCentavos,
-    ...(pagos ? paymentSummary({ ...reserva, pagos }) : {}),
+    ...(pagos ? paymentSummary({ ...reserva, pagos }) : saldos(reserva.totalCentavos, reserva.pagadoCentavos)),
   };
 }
 
@@ -196,8 +202,8 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
       if (reserva.estado === "Cancelada") throw fail(409, "La reserva está cancelada.");
       if (reserva.pagos.some((item) => JSON.stringify(referenciaPago(item)) === reference))
         throw fail(409, "Ya se registró esa referencia para el mismo método.");
-      if (montoCentavos > reserva.totalCentavos - reserva.pagadoCentavos)
-        throw fail(409, "El monto supera el saldo pendiente.");
+      if (reserva.pagadoCentavos + montoCentavos > maxCentavos)
+        throw fail(409, "El total registrado supera el límite de importes del sistema.");
       reserva.pagos.push(payment);
       try {
         await saveReserva(reserva);

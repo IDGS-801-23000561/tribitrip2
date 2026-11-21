@@ -18,8 +18,8 @@ export default function Reservas() {
       <h2>{cliente ? "Historial de reservas del cliente" : "Reservas registradas"}</h2>
       {contacto && <p>{contacto.nombre}</p>}
       <div className="formulario-acciones">
-        <Link to="nueva">Nueva reserva</Link>
-        {cliente && <Link to="/clientes">Volver a clientes</Link>}
+        <Link className="btn-primary" to="nueva">Nueva reserva</Link>
+        {cliente && <Link className="btn-secondary" to="/clientes">Volver a clientes</Link>}
       </div>
       <ListFilters list={list} searchLabel="Folio de reserva" selects={[
         { name: "estado", label: "Estado", options: filterOptions(["Pendiente de pago", "Confirmada", "En viaje", "Completada", "Cancelada"]) },

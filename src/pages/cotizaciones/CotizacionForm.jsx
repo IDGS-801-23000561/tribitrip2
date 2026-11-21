@@ -82,7 +82,7 @@ export default function CotizacionForm({
 
   return (
     <>
-      <form className="account-form" onSubmit={submit}>
+      <form className="account-form formulario-grid" onSubmit={submit}>
         {!cotizacion && (
           <>
             <label>
@@ -106,25 +106,27 @@ export default function CotizacionForm({
             </label>
           </>
         )}
-        <label>Vigencia hasta<input name="vigencia" type="date" required defaultValue={cotizacion?.vigencia} /></label>
+        <label className="campo-ancho">Vigencia hasta<input name="vigencia" type="date" required defaultValue={cotizacion?.vigencia} /></label>
         {lineas.length === 0 && <p>Agrega un servicio del catálogo o un concepto manual.</p>}
         {lineas.map((linea, index) => {
           const subtotal = calcularImportes([conceptos[index]], 0, 0)?.subtotalCentavos;
           return (
             <fieldset key={linea.key}>
               <legend>Concepto {index + 1}{linea.nombre ? " · " + linea.nombre : ""}</legend>
-              <label>
-                Descripción
-                <textarea required maxLength={400} rows={2} value={linea.descripcion} onChange={(event) => editarLinea(linea.key, "descripcion", event.target.value)} />
-              </label>
-              <label>
-                Cantidad
-                <input type="number" required min={1} max={maxCantidad} step={1} value={linea.cantidad} onChange={(event) => editarLinea(linea.key, "cantidad", event.target.value)} />
-              </label>
-              <label>
-                Precio unitario (MXN)
-                <input type="number" required min={0} step="0.01" value={linea.precioUnitario} onChange={(event) => editarLinea(linea.key, "precioUnitario", event.target.value)} />
-              </label>
+              <div className="formulario-grid">
+                <label className="campo-ancho">
+                  Descripción
+                  <textarea required maxLength={400} rows={2} value={linea.descripcion} onChange={(event) => editarLinea(linea.key, "descripcion", event.target.value)} />
+                </label>
+                <label>
+                  Cantidad
+                  <input type="number" required min={1} max={maxCantidad} step={1} value={linea.cantidad} onChange={(event) => editarLinea(linea.key, "cantidad", event.target.value)} />
+                </label>
+                <label>
+                  Precio unitario (MXN)
+                  <input type="number" required min={0} step="0.01" value={linea.precioUnitario} onChange={(event) => editarLinea(linea.key, "precioUnitario", event.target.value)} />
+                </label>
+              </div>
               <p>Subtotal {subtotal === undefined ? "—" : mostrarImporte(subtotal)}</p>
               <button type="button" className="btn-secondary" onClick={() => setLineas((prev) => prev.filter(({ key }) => key !== linea.key))}>Quitar concepto</button>
             </fieldset>

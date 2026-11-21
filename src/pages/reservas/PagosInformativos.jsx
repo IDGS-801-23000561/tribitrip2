@@ -45,19 +45,20 @@ export default function PagosInformativos({ reserva, onSaved, disabled, onBusyCh
         <dt>Importe acordado</dt><dd>{mostrarImporte(reserva.totalCentavos)}</dd>
         <dt>Total registrado</dt><dd>{mostrarImporte(reserva.pagadoCentavos)}</dd>
         <dt>Saldo pendiente</dt><dd>{mostrarImporte(reserva.saldoCentavos)}</dd>
+        {reserva.excedenteCentavos > 0 && <><dt>Excedente registrado</dt><dd>{mostrarImporte(reserva.excedenteCentavos)}</dd></>}
       </dl>
       {reserva.estado === "Cancelada" && <p>La reserva está cancelada. Los pagos anteriores se conservan en el historial.</p>}
       {notice && <p role="status">{notice}</p>}
-      {!adding && reserva.estado !== "Cancelada" && reserva.saldoCentavos > 0 && (
+      {!adding && reserva.estado !== "Cancelada" && (
         <button type="button" className="btn-primary" disabled={disabled} onClick={() => {
           setNotice("");
           setAdding(true);
         }}>Registrar pago informativo</button>
       )}
       {adding && reserva.estado !== "Cancelada" && (
-        <form className="account-form" onSubmit={submit}>
+        <form className="account-form formulario-grid" onSubmit={submit}>
           <label>Fecha del pago<input name="fecha" type="date" required max={hoy()} defaultValue={hoy()} /></label>
-          <label>Monto (MXN)<input name="monto" type="number" required min="0.01" step="0.01" max={(reserva.saldoCentavos / 100).toFixed(2)} /></label>
+          <label>Monto (MXN)<input name="monto" type="number" required min="0.01" step="0.01" /></label>
           <label>Método informado<input name="metodo" required maxLength={80} /></label>
           <label>Referencia del pago<input name="referencia" required maxLength={120} /></label>
           <label>Observaciones<textarea name="observaciones" maxLength={500} rows={3} /></label>

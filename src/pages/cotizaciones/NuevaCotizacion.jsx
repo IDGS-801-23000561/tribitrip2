@@ -20,7 +20,7 @@ export default function NuevaCotizacion() {
       {opciones && opportunityId && !oportunidadInicial && <p role="alert">La oportunidad seleccionada no está disponible.</p>}
       {(!opciones || (serviceId && !servicio)) && !error && !errorServicio && <p role="status">Cargando datos…</p>}
       {opciones?.length === 0 && <p>Registra una <Link to="/oportunidades">oportunidad comercial</Link> para continuar.</p>}
-      <Link to="/cotizaciones">Volver a cotizaciones</Link>
+      <Link className="btn-secondary" to="/cotizaciones">Volver a cotizaciones</Link>
       {opciones?.length > 0 && (!serviceId || servicio) && (
         <CotizacionForm
           key={params.toString()}

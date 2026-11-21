@@ -3,7 +3,7 @@ import { api } from "../../services/api";
 
 const tipos = ["Adulto", "Menor", "Infante"];
 
-export default function Viajeros({ solicitud, onSaved }) {
+export default function Viajeros({ solicitud, onSaved, onEditCapacity }) {
   const [form, setForm] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,10 +44,13 @@ export default function Viajeros({ solicitud, onSaved }) {
         ))}
       </ul>
       {!form && viajeros.length < cantidadViajeros && (
-        <button className="btn-primary" onClick={() => openForm({})}>Registrar viajero</button>
+        <button type="button" className="btn-primary" onClick={() => openForm({})}>Registrar viajero</button>
       )}
-      {!form && viajeros.length === cantidadViajeros && (
-        <p>Aumenta el número de viajeros de la solicitud para registrar otro.</p>
+      {!form && viajeros.length >= cantidadViajeros && (
+        <>
+          <p>Se alcanzó el cupo de la solicitud.</p>
+          <button type="button" className="btn-secondary" onClick={onEditCapacity}>Aumentar cupo</button>
+        </>
       )}
       {viajeros.length > 0 && (
         <div className="tabla-contenedor">
@@ -58,7 +61,7 @@ export default function Viajeros({ solicitud, onSaved }) {
                 <tr key={viajero.id}>
                   <td>{viajero.nombre}</td><td>{viajero.parentesco}</td>
                   <td>{viajero.tipo}</td><td>{viajero.nacimiento || "—"}</td>
-                  <td><button disabled={busy} onClick={() => openForm(viajero)}>Editar</button></td>
+                  <td><button type="button" className="btn-secondary" disabled={busy} onClick={() => openForm(viajero)}>Editar</button></td>
                 </tr>
               ))}
             </tbody>
@@ -66,7 +69,7 @@ export default function Viajeros({ solicitud, onSaved }) {
         </div>
       )}
       {form && (
-        <form key={form.id || "nuevo"} className="account-form" onSubmit={submit}>
+        <form key={form.id || "nuevo"} className="account-form formulario-grid" onSubmit={submit}>
           <h3>{form.id ? "Editar viajero" : "Registrar viajero"}</h3>
           <label>Nombre<input name="nombre" required maxLength={120} defaultValue={form.nombre} /></label>
           <label>Relación con el cliente principal<input name="parentesco" required maxLength={100} defaultValue={form.parentesco} /></label>

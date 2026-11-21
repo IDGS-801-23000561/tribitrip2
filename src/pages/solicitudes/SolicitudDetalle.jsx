@@ -22,7 +22,7 @@ function Detalle({ id }) {
   return (
     <>
       <section className="panel">
-        <Link to="/solicitudes">Volver a solicitudes</Link>
+        <Link className="btn-secondary" to="/solicitudes">Volver a solicitudes</Link>
         {error && <p role="alert">{error}</p>}
         {!solicitud && !error && <p role="status">Cargando solicitud…</p>}
         {solicitud && (
@@ -45,7 +45,7 @@ function Detalle({ id }) {
           </>
         )}
       </section>
-      {solicitud && !editando && <Viajeros solicitud={solicitud} onSaved={setSolicitud} />}
+      {solicitud && !editando && <Viajeros solicitud={solicitud} onSaved={setSolicitud} onEditCapacity={() => setEditando(true)} />}
     </>
   );
 }

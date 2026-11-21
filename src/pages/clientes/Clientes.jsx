@@ -235,7 +235,7 @@ function GestionClientes({ id }) {
                       <td>{cliente.destinoInteres || "—"}</td>
                       <td>
                         <div className="acciones-cliente">
-                          <Link to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
+                          <Link className="btn-secondary" to={"/reservas?cliente=" + cliente.id}>Historial de reservas</Link>
                           <button onClick={() => editarCliente(cliente)}>
                             Editar
                           </button>

@@ -87,8 +87,6 @@ reservaSchema.pre("validate", function () {
     pagado += pago.montoCentavos;
   }
   this.pagadoCentavos = pagado;
-  if (pagado > this.totalCentavos)
-    this.invalidate("pagos", "El total registrado supera el importe acordado.");
 });
 
 reservaSchema.index({ asesor: 1, estado: 1, createdAt: -1 });

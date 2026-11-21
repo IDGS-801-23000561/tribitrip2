@@ -48,7 +48,7 @@ export default function Usuarios() {
     <section className="panel">
       <h2>Usuarios y roles</h2>
       {error && <p role="alert">{error}</p>}
-      <form onSubmit={submit} className="account-form">
+      <form onSubmit={submit} className="account-form formulario-grid">
         {["nombre", "correo", "password"].map((field) => (
           <label key={field}>
             {field === "password"
@@ -92,20 +92,23 @@ export default function Usuarios() {
           />{" "}
           Cuenta activa
         </label>
-        <button className="btn-primary" disabled={busy}>
-          {busy ? "Guardando…" : id ? "Guardar cambios" : "Crear usuario"}
-        </button>
-        {id && (
-          <button
-            type="button"
-            onClick={() => {
-              setId(null);
-              setForm(initial);
-            }}
-          >
-            Cancelar edición
+        <div className="formulario-acciones">
+          <button className="btn-primary" disabled={busy}>
+            {busy ? "Guardando…" : id ? "Guardar cambios" : "Crear usuario"}
           </button>
-        )}
+          {id && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                setId(null);
+                setForm(initial);
+              }}
+            >
+              Cancelar edición
+            </button>
+          )}
+        </div>
       </form>
       <div className="tabla-contenedor">
         <table className="tabla-clientes">

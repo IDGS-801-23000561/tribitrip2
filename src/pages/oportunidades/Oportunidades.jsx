@@ -39,7 +39,7 @@ function NuevaOportunidad({ onCancel }) {
   }
 
   return (
-    <form className="account-form" onSubmit={submit}>
+    <form className="account-form formulario-grid" onSubmit={submit}>
       <h3>Nueva oportunidad</h3>
       {loadError && <p role="alert">{loadError}</p>}
       {!solicitudes && !loadError && <p role="status">Cargando solicitudes…</p>}

@@ -19,7 +19,22 @@ button {
   font: inherit;
 }
 
-button:focus-visible {
+a.btn-primary,
+a.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+button:focus-visible,
+a.btn-primary:focus-visible,
+a.btn-secondary:focus-visible {
   outline: 3px solid #93c5fd;
   outline-offset: 2px;
 }

@@ -32,9 +32,9 @@ export default function Catalogo({ onSelect, disabled = false }) {
 
   return (
     <section className="panel">
-      {!onSelect && <Link to="/cotizaciones">Volver a cotizaciones</Link>}
+      {!onSelect && <Link className="btn-secondary" to="/cotizaciones">Volver a cotizaciones</Link>}
       <h2>Catálogo de servicios turísticos</h2>
-      <form className="account-form" onSubmit={search}>
+      <form className="account-form formulario-grid" onSubmit={search}>
         <label>Nombre o destino<input name="q" type="search" maxLength={120} /></label>
         <label>Filtrar por destino<input name="destino" type="search" maxLength={120} /></label>
         <button className="btn-secondary">Buscar</button>
@@ -53,7 +53,7 @@ export default function Catalogo({ onSelect, disabled = false }) {
           {" "}
           {onSelect
             ? <button type="button" className="btn-primary" disabled={disabled} onClick={() => onSelect(servicio)}>Agregar a la cotización</button>
-            : <Link to={"/cotizaciones/nueva?servicio=" + servicio.id}>Cotizar este servicio</Link>}
+            : <Link className="btn-primary" to={"/cotizaciones/nueva?servicio=" + servicio.id}>Cotizar este servicio</Link>}
           {selected === servicio.id && <ServicioDetalle id={servicio.id} />}
         </article>
       ))}

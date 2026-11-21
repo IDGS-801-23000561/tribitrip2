@@ -28,7 +28,7 @@ export default function SolicitudForm({ solicitud, clientes, onSave, onCancel })
   }
 
   return (
-    <form onSubmit={submit} className="account-form">
+    <form onSubmit={submit} className="account-form formulario-grid">
       {!solicitud && (
         <label>
           Cliente o prospecto
@@ -42,7 +42,7 @@ export default function SolicitudForm({ solicitud, clientes, onSave, onCancel })
           </select>
         </label>
       )}
-      <label>Destino<input name="destino" required maxLength={200} defaultValue={solicitud?.destino} /></label>
+      <label className={solicitud ? "campo-ancho" : undefined}>Destino<input name="destino" required maxLength={200} defaultValue={solicitud?.destino} /></label>
       <label>Salida<input name="salida" type="date" required defaultValue={solicitud?.salida} /></label>
       <label>Regreso<input name="regreso" type="date" required defaultValue={solicitud?.regreso} /></label>
       <label>Presupuesto (MXN)<input name="presupuesto" type="number" required min={0} step="any" defaultValue={solicitud?.presupuesto} /></label>

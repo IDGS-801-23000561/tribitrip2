@@ -21,10 +21,10 @@ function VistaDocumento({ id, version }) {
   return (
     <section className="panel">
       <div className="formulario-acciones">
-        <Link to={"/cotizaciones/" + id}>Volver a la cotización</Link>
+        <Link className="btn-secondary" to={"/cotizaciones/" + id}>Volver a la cotización</Link>
         {data && (
           <>
-            <a href={"/api" + path + "/documento"} target="_blank" rel="noreferrer">Abrir en otra pestaña</a>
+            <a className="btn-secondary" href={"/api" + path + "/documento"} target="_blank" rel="noreferrer">Abrir en otra pestaña</a>
             <button type="button" className="btn-primary" disabled={!ready} onClick={imprimir}>Imprimir o guardar como PDF</button>
           </>
         )}

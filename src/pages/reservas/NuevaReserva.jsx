@@ -33,13 +33,13 @@ function Registro({ cotizacionInicial }) {
   return (
     <section className="panel">
       <h2>Nueva reserva interna</h2>
-      <Link to="/reservas">Volver a reservas</Link>
+      <Link className="btn-secondary" to="/reservas">Volver a reservas</Link>
       {!accepted && !loadError && <p role="status">Cargando cotizaciones…</p>}
       {loadError && <p role="alert">{loadError}</p>}
       {accepted?.length === 0 && <p>No hay <Link to="/cotizaciones">cotizaciones aceptadas</Link> disponibles.</p>}
       {accepted?.length > 0 && (
-        <form className="account-form" onSubmit={submit}>
-          <label>
+        <form className="account-form formulario-grid" onSubmit={submit}>
+          <label className="campo-ancho">
             Cotización aceptada
             <select required disabled={busy} value={quote?.estado === "Aceptada" ? selected : ""} onChange={(event) => {
               setError("");
@@ -54,11 +54,11 @@ function Registro({ cotizacionInicial }) {
           {selected && quote?.estado !== "Aceptada" && <p role="alert">La cotización indicada no está disponible para reservar.</p>}
           {quote?.estado === "Aceptada" && existing === undefined && !lookupError && <p role="status">Consultando reserva existente…</p>}
           {lookupError && <p role="alert">{lookupError}</p>}
-          {existing && <Link to={"/reservas/" + existing.id}>Consultar reserva {existing.folio}</Link>}
+          {existing && <Link className="btn-primary" to={"/reservas/" + existing.id}>Consultar reserva {existing.folio}</Link>}
           {existing === null && (
             <>
               <p>La oportunidad debe estar en etapa Ganada. El registro es interno.</p>
-              {quote?.oportunidad && <Link to={"/oportunidades/" + quote.oportunidad._id}>Consultar oportunidad</Link>}
+              {quote?.oportunidad && <Link className="btn-secondary" to={"/oportunidades/" + quote.oportunidad._id}>Consultar oportunidad</Link>}
               <label>Localizador externo (opcional)<input name="localizador" maxLength={120} /></label>
               <label>Proveedor de referencia (opcional)<input name="proveedorReferencia" maxLength={150} /></label>
               <button className="btn-primary" disabled={busy}>{busy ? "Guardando…" : "Registrar reserva"}</button>

@@ -1,7 +1,7 @@
 export default function ListFilters({ list, searchLabel, selects = [] }) {
   const { search, setFilters } = list;
   return (
-    <form className="account-form" key={search.toString()} onSubmit={(event) => {
+    <form className="account-form formulario-grid" key={search.toString()} onSubmit={(event) => {
       event.preventDefault();
       setFilters(new FormData(event.currentTarget));
     }}>

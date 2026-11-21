@@ -33,7 +33,7 @@ function Detalle({ id }) {
 
   return (
     <section className="panel">
-      <Link to="/oportunidades">Volver a oportunidades</Link>
+      <Link className="btn-secondary" to="/oportunidades">Volver a oportunidades</Link>
       {loadError && <p role="alert">{loadError}</p>}
       {!oportunidad && !loadError && <p role="status">Cargando oportunidad…</p>}
       {oportunidad && (
@@ -49,9 +49,9 @@ function Detalle({ id }) {
               <><dt>Fecha de cierre</dt><dd>{new Date(oportunidad.cerradaEn).toLocaleString("es-MX")}</dd></>
             )}
           </dl>
-          <Link to={"/cotizaciones?oportunidad=" + id}>Consultar cotizaciones</Link>
+          <Link className="btn-secondary" to={"/cotizaciones?oportunidad=" + id}>Consultar cotizaciones</Link>
           {editing ? (
-            <form className="account-form" onSubmit={submit}>
+            <form className="account-form formulario-grid" onSubmit={submit}>
               <label>Título<input name="titulo" required maxLength={120} defaultValue={oportunidad.titulo} /></label>
               <label>
                 Etapa

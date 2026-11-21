@@ -85,8 +85,10 @@ test("API de viajes usa el alcance de sesión y protege asociaciones y borrado",
     if (!visible(filter)) return { matchedCount: 0 };
     if (update.$push) solicitudes.push(update.$push.solicitudes);
     else {
+      assert.equal(Object.keys(update.$set).some((path) => path.startsWith("solicitudes.$.")), false);
+      assert.ok(update.$set.updatedAt instanceof Date);
       const { _id, revision } = filter.solicitudes.$elemMatch;
-      const index = solicitudes.findIndex((s) => s._id.equals(_id) && s.revision === revision);
+      const index = solicitudes.findIndex((s) => s._id.equals(_id) && (revision.$in ? revision.$in.includes(s.revision ?? null) : s.revision === revision));
       if (index < 0 || conflict) return { matchedCount: 0 };
       solicitudes[index] = update.$set["solicitudes.$"];
     }
@@ -133,6 +135,7 @@ test("API de viajes usa el alcance de sesión y protege asociaciones y borrado",
   assert.equal((await call(travelers, "ajeno", "POST", viajeroValido)).status, 404);
   assert.equal((await call(travelers, "propio", "POST", { ...viajeroValido, tipo: "Otro" })).status, 400);
 
+  delete solicitudes[0].revision;
   const first = await call(travelers, "propio", "POST", { ...viajeroValido, cliente: String(oid()) });
   assert.equal(first.status, 201);
   assert.equal(first.body.cliente.id, String(id));
