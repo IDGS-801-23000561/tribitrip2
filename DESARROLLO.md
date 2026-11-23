@@ -3,8 +3,8 @@ Requiere Node.js 24 y MongoDB local o Atlas. Se usa MongoDB por decisión del pr
 
 ## Preparación
 Desde tribitrip/tribitrip:
-1. Ejecutar npm.cmd install.
-2. Ejecutar npm.cmd --prefix server install.
+1. Ejecutar `npm ci`.
+2. Ejecutar `npm --prefix server ci`.
 3. Copiar server/.env.example a server/.env.
 4. Configurar MONGODB_URI y una ADMIN_PASSWORD de 12 a 128 caracteres. No compartir .env ni credenciales.
 5. Ejecutar npm.cmd --prefix server run seed:admin (una sola vez).
@@ -79,5 +79,13 @@ npm.cmd run build
 npm.cmd --prefix server test
 
 Prueba manual con MongoDB: crear administrador, iniciar sesión, crear asesor, registrar y editar contacto, intentar duplicado, cerrar sesión; comprobar con otro asesor que no puede consultar el contacto ajeno ni administrar usuarios. Desactivar el asesor y comprobar que su sesión deja de funcionar.
-Para producción servir frontend y /api bajo el mismo origen mediante HTTPS, configurar APP_ORIGIN con el origen público y NODE_ENV=production. La API escucha en loopback para uso detrás de un proxy.
+## Render y registros HTTP
+
+Configura un Web Service Node.js 24 por ambiente, con la raíz del repositorio como directorio de trabajo. Usa `npm ci --include=dev && npm --prefix server ci --omit=dev && npm run build` como comando de compilación y `node server/index.js` como comando de inicio. Configura `SKIP_INSTALL_DEPS=true` para que el comando de compilación controle la instalación y `NODE_VERSION` con una versión de Node 24.
+
+Inyecta `MONGODB_URI` del ambiente, `APP_ORIGIN` con su origen HTTPS público y `NODE_ENV=production`. Render suministra `PORT` y `RENDER=true`. Fuera de Render el host predeterminado es `127.0.0.1`. Se puede definir `HOST` explícitamente. El servicio entrega la SPA compilada y `/api` bajo el mismo origen. El chequeo de salud de Render puede usar `/api/health`.
+
+Desde la pestaña Network del navegador, copia el valor de `X-Request-ID` y búscalo en Render Logs. Cada respuesta completada genera un evento JSON `http_request` con método, ruta normalizada, estado y duración. Un fallo interno registra además un evento `http_error` con el mismo ID. Esto permite seguir una solicitud dentro de Express mediante correlación de logs. El alcance se limita al proceso de la aplicación.
+
+Para calcular métricas en una ventana, cuenta solo los eventos `http_request` completados. Calcula el porcentaje de 5xx dividiendo su número entre el total de eventos de la muestra. Usa `durationMs` para el promedio y percentiles como p95.
 Documentación de referencia: https://expressjs.com/en/5x/guide/error-handling/ y https://mongoosejs.com/docs/validation.html

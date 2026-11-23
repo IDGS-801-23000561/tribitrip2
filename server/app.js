@@ -2,7 +2,9 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import mongoose from "mongoose";
 import { Usuario, Sesion, Cliente } from "./models.js";
 import { registerTravelRoutes } from "./travel-routes.js";
@@ -18,7 +20,38 @@ import {
   publicUser,
 } from "./security.js";
 export const app = express();
+const dist = fileURLToPath(new URL("../dist/", import.meta.url));
+const isApiPath = /^\/api(?:\/|$)/i;
+
+function logRequest(req, res, level, event, details = {}) {
+  const entry = JSON.stringify({
+    timestamp: new Date().toISOString(),
+    level,
+    event,
+    requestId: res.locals.requestId,
+    method: req.method,
+    route: req.route?.path ?? (isApiPath.test(req.path) ? "/api/*" : "frontend"),
+    ...details,
+  });
+  if (level === "error") console.error(entry);
+  else console.log(entry);
+}
+
 app.disable("x-powered-by");
+app.use((req, res, next) => {
+  const startedAt = performance.now();
+  res.locals.requestId = randomUUID();
+  res.set("X-Request-ID", res.locals.requestId);
+  res.once("finish", () => {
+    const status = res.statusCode;
+    const level = status >= 500 ? "error" : status >= 400 ? "warn" : "info";
+    logRequest(req, res, level, "http_request", {
+      status,
+      durationMs: Number((performance.now() - startedAt).toFixed(2)),
+    });
+  });
+  next();
+});
 app.use(helmet(), express.json({ limit: "32kb" }), cookieParser());
 const cookieOptions = {
   httpOnly: true,
@@ -278,8 +311,32 @@ registerCommercialRoutes(app, { scope, fail, validId, admin, clientJson });
 app.use("/api", (req, res) =>
   res.status(404).json({ mensaje: "Ruta no encontrada." }),
 );
+app.use(express.static(dist, { redirect: false }));
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  let path;
+  try {
+    path = decodeURIComponent(req.path);
+  } catch {
+    return next();
+  }
+  if (/^\/assets(?:\/|$)|\./i.test(path)) return next();
+
+  res.vary("Accept");
+  const accept = req.get("Accept") || "";
+  if (!/(?:^|,)\s*text\/html\s*(?:[;,]|$)/i.test(accept) || !req.accepts("html"))
+    return next();
+
+  res.sendFile(join(dist, "index.html"), (error) => {
+    if (error?.code === "ENOENT" && !res.headersSent) return next();
+    if (error) next(error);
+  });
+});
 app.use((error, req, res, next) => {
-  if (res.headersSent) return next(error);
+  if (res.headersSent) {
+    logRequest(req, res, "error", "http_error", { status: res.statusCode });
+    return next(new Error("Error al completar la respuesta."));
+  }
   if (error.code === 11000)
     return res
       .status(409)
@@ -289,7 +346,7 @@ app.use((error, req, res, next) => {
       mensaje: "Revisa los campos obligatorios, formatos e importes.",
     });
   const status = error.status || 500;
-  if (status >= 500) console.error("Error API:", error.name);
+  if (status >= 500) logRequest(req, res, "error", "http_error", { status });
   res.status(status).json({
     mensaje:
       status >= 500 ? "No fue posible completar la operación." : error.message,
