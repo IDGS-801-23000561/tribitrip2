@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { useApiData } from "../../services/useApiData";
@@ -213,17 +214,19 @@ function GestionClientes({ id }) {
             </div>
           )}
           <section className="clientes-panel">
-            <ListFilters
-              list={listado}
-              searchLabel="Nombre, correo o teléfono"
-              selects={[
-                {
-                  name: "estado",
-                  label: "Estado",
-                  options: filterOptions(["Prospecto", "Activo", "Inactivo"]),
-                },
-              ]}
-            />
+            <div className="clientes-filtros">
+              <ListFilters
+                list={listado}
+                searchLabel="Nombre, correo o teléfono"
+                selects={[
+                  {
+                    name: "estado",
+                    label: "Estado",
+                    options: filterOptions(["Prospecto", "Activo", "Inactivo"]),
+                  },
+                ]}
+              />
+            </div>
 
             <div className="tabla-contenedor">
               <table className="tabla-clientes">
@@ -298,164 +301,144 @@ function GestionClientes({ id }) {
       )}
 
       {mostrarFormulario && (
-        <div className="modal-overlay">
-          <section
-            className="modal-cliente"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="formulario-cliente-titulo"
-          >
-            <div className="modal-header">
-              <h2 id="formulario-cliente-titulo">
-                {editandoId !== null ? "Editar contacto" : "Nuevo contacto"}
-              </h2>
-              <button
-                className="cerrar-modal"
-                onClick={cerrarFormulario}
-                aria-label="Cerrar formulario"
-              >
-                ×
-              </button>
+        <FormDialog
+          title={editandoId !== null ? "Editar contacto" : "Nuevo contacto"}
+          onClose={cerrarFormulario}
+          busy={guardando}
+        >
+          <form onSubmit={guardarCliente}>
+            <div className="formulario-grid">
+              <label>
+                Nombre completo *
+                <input
+                  name="nombre"
+                  value={formulario.nombre}
+                  onChange={actualizarCampo}
+                  required
+                  maxLength={120}
+                />
+              </label>
+
+              <label>
+                Teléfono *
+                <input
+                  name="telefono"
+                  type="tel"
+                  value={formulario.telefono}
+                  onChange={actualizarCampo}
+                  required
+                />
+              </label>
+
+              <label>
+                Correo electrónico *
+                <input
+                  name="correo"
+                  type="email"
+                  value={formulario.correo}
+                  onChange={actualizarCampo}
+                  required
+                />
+              </label>
+
+              <label>
+                Ubicación
+                <input
+                  name="ubicacion"
+                  value={formulario.ubicacion}
+                  onChange={actualizarCampo}
+                />
+              </label>
+
+              <label>
+                Estado comercial
+                <select
+                  name="estado"
+                  value={formulario.estado}
+                  onChange={actualizarCampo}
+                >
+                  <option value="Prospecto">Prospecto</option>
+                  <option value="Activo">Cliente activo</option>
+                  <option value="Inactivo">Cliente inactivo</option>
+                </select>
+              </label>
+
+              <label>
+                Origen del contacto
+                <select
+                  name="origen"
+                  value={formulario.origen}
+                  onChange={actualizarCampo}
+                >
+                  <option value="Otro">Otro</option>
+                  <option value="Redes sociales">Redes sociales</option>
+                  <option value="Recomendación">Recomendación</option>
+                  <option value="Sitio web">Sitio web</option>
+                  <option value="Visita a agencia">Visita a agencia</option>
+                  <option value="Llamada">Llamada</option>
+                </select>
+              </label>
+
+              <label>
+                Medio de contacto preferido
+                <select
+                  name="contactoPreferido"
+                  value={formulario.contactoPreferido}
+                  onChange={actualizarCampo}
+                >
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Teléfono">Teléfono</option>
+                  <option value="Correo electrónico">Correo electrónico</option>
+                </select>
+              </label>
+
+              <label>
+                Destino de interés
+                <input
+                  name="destinoInteres"
+                  placeholder="Ej. Cancún"
+                  value={formulario.destinoInteres}
+                  onChange={actualizarCampo}
+                />
+              </label>
+
+              <label>
+                Presupuesto aproximado (MXN)
+                <input
+                  name="presupuesto"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formulario.presupuesto}
+                  onChange={actualizarCampo}
+                />
+              </label>
             </div>
 
-            <form onSubmit={guardarCliente}>
-              <div className="formulario-grid">
-                <label>
-                  Nombre completo *
-                  <input
-                    name="nombre"
-                    value={formulario.nombre}
-                    onChange={actualizarCampo}
-                    required
-                    maxLength={120}
-                  />
-                </label>
+            {error && (
+              <p className="formulario-error" role="alert">
+                {error}
+              </p>
+            )}
 
-                <label>
-                  Teléfono *
-                  <input
-                    name="telefono"
-                    type="tel"
-                    value={formulario.telefono}
-                    onChange={actualizarCampo}
-                    required
-                  />
-                </label>
-
-                <label>
-                  Correo electrónico *
-                  <input
-                    name="correo"
-                    type="email"
-                    value={formulario.correo}
-                    onChange={actualizarCampo}
-                    required
-                  />
-                </label>
-
-                <label>
-                  Ubicación
-                  <input
-                    name="ubicacion"
-                    value={formulario.ubicacion}
-                    onChange={actualizarCampo}
-                  />
-                </label>
-
-                <label>
-                  Estado comercial
-                  <select
-                    name="estado"
-                    value={formulario.estado}
-                    onChange={actualizarCampo}
-                  >
-                    <option value="Prospecto">Prospecto</option>
-                    <option value="Activo">Cliente activo</option>
-                    <option value="Inactivo">Cliente inactivo</option>
-                  </select>
-                </label>
-
-                <label>
-                  Origen del contacto
-                  <select
-                    name="origen"
-                    value={formulario.origen}
-                    onChange={actualizarCampo}
-                  >
-                    <option value="Otro">Otro</option>
-                    <option value="Redes sociales">Redes sociales</option>
-                    <option value="Recomendación">Recomendación</option>
-                    <option value="Sitio web">Sitio web</option>
-                    <option value="Visita a agencia">Visita a agencia</option>
-                    <option value="Llamada">Llamada</option>
-                  </select>
-                </label>
-
-                <label>
-                  Medio de contacto preferido
-                  <select
-                    name="contactoPreferido"
-                    value={formulario.contactoPreferido}
-                    onChange={actualizarCampo}
-                  >
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Teléfono">Teléfono</option>
-                    <option value="Correo electrónico">
-                      Correo electrónico
-                    </option>
-                  </select>
-                </label>
-
-                <label>
-                  Destino de interés
-                  <input
-                    name="destinoInteres"
-                    placeholder="Ej. Cancún"
-                    value={formulario.destinoInteres}
-                    onChange={actualizarCampo}
-                  />
-                </label>
-
-                <label>
-                  Presupuesto aproximado (MXN)
-                  <input
-                    name="presupuesto"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formulario.presupuesto}
-                    onChange={actualizarCampo}
-                  />
-                </label>
-              </div>
-
-              {error && (
-                <p className="formulario-error" role="alert">
-                  {error}
-                </p>
-              )}
-
-              <div className="formulario-acciones">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={cerrarFormulario}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={guardando}
-                >
-                  {editandoId !== null
-                    ? "Guardar cambios"
-                    : "Registrar contacto"}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
+            <div className="formulario-acciones">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={cerrarFormulario}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={guardando}
+              >
+                {editandoId !== null ? "Guardar cambios" : "Registrar contacto"}
+              </button>
+            </div>
+          </form>
+        </FormDialog>
       )}
       <ConfirmDialog
         abierto={clienteAEliminar !== null}

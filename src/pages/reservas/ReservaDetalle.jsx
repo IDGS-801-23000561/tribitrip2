@@ -1,9 +1,12 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router";
 import { api } from "../../services/api";
 import { useApiData } from "../../services/useApiData";
 import { mostrarImporte } from "../cotizaciones/importes";
 import PagosInformativos from "./PagosInformativos";
+import "../../components/ficha.css";
+import "./reserva-detalle.css";
 
 function Detalle({ id }) {
   const path = "/reservas/" + id;
@@ -17,6 +20,12 @@ function Detalle({ id }) {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const reserva = updated ?? data;
+
+  function closeEditor() {
+    setEstado("");
+    setError("");
+    setEditing(false);
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -47,119 +56,30 @@ function Detalle({ id }) {
 
   return (
     <>
-      <section className="panel">
+      <div>
         <Link className="btn-secondary" to="/reservas">
-          Volver a reservas
+          ← Volver a reservas
         </Link>
-        {loadError && <p role="alert">{loadError}</p>}
-        {!reserva && !loadError && <p role="status">Cargando reserva…</p>}
-        {reserva && (
-          <>
-            <h2>{reserva.folio}</h2>
-            {(notice || location.state?.registrada) && (
-              <p role="status">{notice || "Reserva interna registrada."}</p>
-            )}
-            <dl>
-              <dt>Cliente</dt>
-              <dd>
-                <Link to={"/reservas?cliente=" + reserva.cliente}>
-                  {reserva.clienteDocumento.nombre}
-                </Link>
-              </dd>
-              <dt>Cotización de origen</dt>
-              <dd>
-                <Link to={"/cotizaciones/" + reserva.cotizacion}>
-                  {reserva.folioCotizacion}
-                </Link>{" "}
-                · versión {reserva.versionAceptada}
-              </dd>
-              <dt>Oportunidad</dt>
-              <dd>
-                <Link to={"/oportunidades/" + reserva.oportunidad}>
-                  Consultar oportunidad
-                </Link>
-              </dd>
-              <dt>Solicitud</dt>
-              <dd>
-                <Link to={"/solicitudes/" + reserva.solicitud}>
-                  Consultar solicitud de viaje
-                </Link>
-              </dd>
-              <dt>Destino</dt>
-              <dd>{reserva.destino}</dd>
-              <dt>Fechas del viaje</dt>
-              <dd>
-                {reserva.salida} a {reserva.regreso}
-              </dd>
-              <dt>Fecha de registro</dt>
-              <dd>{new Date(reserva.createdAt).toLocaleDateString("es-MX")}</dd>
-              <dt>Estado</dt>
-              <dd>{reserva.estado}</dd>
-              <dt>Localizador externo</dt>
-              <dd>{reserva.localizador || "—"}</dd>
-              <dt>Proveedor de referencia</dt>
-              <dd>{reserva.proveedorReferencia || "—"}</dd>
-            </dl>
-            {editing ? (
-              <form className="account-form formulario-grid" onSubmit={submit}>
-                <label className="campo-ancho">
-                  Nuevo estado
-                  <select
-                    value={estado}
-                    onChange={(event) => setEstado(event.target.value)}
-                  >
-                    <option value="">Conservar estado actual</option>
-                    {reserva.transiciones.map((item) => (
-                      <option key={item}>{item}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Localizador externo
-                  <input
-                    name="localizador"
-                    maxLength={120}
-                    defaultValue={reserva.localizador}
-                  />
-                </label>
-                <label>
-                  Proveedor de referencia
-                  <input
-                    name="proveedorReferencia"
-                    maxLength={150}
-                    defaultValue={reserva.proveedorReferencia}
-                  />
-                </label>
-                {estado === "Cancelada" && (
-                  <p>
-                    La cancelación es definitiva. Los pagos informativos
-                    existentes se conservan.
-                  </p>
-                )}
-                {error && <p role="alert">{error}</p>}
-                <div className="formulario-acciones">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    disabled={busy}
-                    onClick={() => {
-                      setEstado("");
-                      setError("");
-                      setEditing(false);
-                    }}
-                  >
-                    Cancelar edición
-                  </button>
-                  <button
-                    className="btn-primary"
-                    disabled={busy || paymentBusy}
-                  >
-                    {busy ? "Guardando…" : "Guardar cambios"}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              reserva.transiciones.length > 0 && (
+      </div>
+      {loadError && <p role="alert">{loadError}</p>}
+      {!reserva && !loadError && <p role="status">Cargando reserva…</p>}
+      {reserva && (
+        <>
+          <section
+            className="panel ficha-panel"
+            aria-labelledby="reserva-folio"
+          >
+            <header className="ficha-encabezado">
+              <div>
+                <span className="ficha-estado" data-estado={reserva.estado}>
+                  {reserva.estado}
+                </span>
+                <h2 className="ficha-titulo" id="reserva-folio">
+                  {reserva.folio}
+                </h2>
+                <p>{reserva.destino}</p>
+              </div>
+              {reserva.transiciones.length > 0 && (
                 <button
                   type="button"
                   className="btn-primary"
@@ -168,9 +88,141 @@ function Detalle({ id }) {
                 >
                   Actualizar reserva
                 </button>
-              )
+              )}
+            </header>
+
+            {(notice || location.state?.registrada) && (
+              <p className="reserva-aviso" role="status">
+                {notice || "Reserva interna registrada."}
+              </p>
             )}
-            <h3>Servicios acordados</h3>
+
+            <dl className="ficha-datos">
+              <div>
+                <dt>Cliente</dt>
+                <dd>
+                  <Link to={"/reservas?cliente=" + reserva.cliente}>
+                    {reserva.clienteDocumento.nombre}
+                  </Link>
+                </dd>
+              </div>
+              <div>
+                <dt>Cotización de origen</dt>
+                <dd>
+                  <Link to={"/cotizaciones/" + reserva.cotizacion}>
+                    {reserva.folioCotizacion}
+                  </Link>{" "}
+                  · versión {reserva.versionAceptada}
+                </dd>
+              </div>
+              <div>
+                <dt>Fechas del viaje</dt>
+                <dd>
+                  <time dateTime={reserva.salida}>{reserva.salida}</time> a{" "}
+                  <time dateTime={reserva.regreso}>{reserva.regreso}</time>
+                </dd>
+              </div>
+              <div>
+                <dt>Fecha de registro</dt>
+                <dd>
+                  {new Date(reserva.createdAt).toLocaleDateString("es-MX")}
+                </dd>
+              </div>
+              <div>
+                <dt>Localizador externo</dt>
+                <dd>{reserva.localizador || "—"}</dd>
+              </div>
+              <div>
+                <dt>Proveedor de referencia</dt>
+                <dd>{reserva.proveedorReferencia || "—"}</dd>
+              </div>
+            </dl>
+
+            <nav className="ficha-enlaces" aria-label="Registros vinculados">
+              <Link
+                className="btn-secondary"
+                to={"/oportunidades/" + reserva.oportunidad}
+              >
+                Consultar oportunidad
+              </Link>
+              <Link
+                className="btn-secondary"
+                to={"/solicitudes/" + reserva.solicitud}
+              >
+                Consultar solicitud de viaje
+              </Link>
+            </nav>
+            {editing && (
+              <FormDialog
+                title="Actualizar reserva"
+                onClose={closeEditor}
+                busy={busy}
+              >
+                <form
+                  className="account-form formulario-grid"
+                  onSubmit={submit}
+                >
+                  <label className="campo-ancho">
+                    Nuevo estado
+                    <select
+                      value={estado}
+                      onChange={(event) => setEstado(event.target.value)}
+                    >
+                      <option value="">Conservar estado actual</option>
+                      {reserva.transiciones.map((item) => (
+                        <option key={item}>{item}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Localizador externo
+                    <input
+                      name="localizador"
+                      maxLength={120}
+                      defaultValue={reserva.localizador}
+                    />
+                  </label>
+                  <label>
+                    Proveedor de referencia
+                    <input
+                      name="proveedorReferencia"
+                      maxLength={150}
+                      defaultValue={reserva.proveedorReferencia}
+                    />
+                  </label>
+                  {estado === "Cancelada" && (
+                    <p>
+                      La cancelación es definitiva. Los pagos informativos
+                      existentes se conservan.
+                    </p>
+                  )}
+                  {error && <p role="alert">{error}</p>}
+                  <div className="formulario-acciones">
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      disabled={busy}
+                      onClick={closeEditor}
+                    >
+                      Cancelar edición
+                    </button>
+                    <button
+                      className="btn-primary"
+                      disabled={busy || paymentBusy}
+                    >
+                      {busy ? "Guardando…" : "Guardar cambios"}
+                    </button>
+                  </div>
+                </form>
+              </FormDialog>
+            )}
+          </section>
+
+          <section
+            className="panel ficha-panel reserva-tabla"
+            aria-labelledby="reserva-servicios"
+          >
+            <h2 id="reserva-servicios">Servicios acordados</h2>
             <div className="tabla-contenedor">
               <table className="tabla-clientes">
                 <thead>
@@ -195,28 +247,47 @@ function Detalle({ id }) {
                 </tbody>
               </table>
             </div>
-            <dl>
-              <dt>Subtotal</dt>
-              <dd>{mostrarImporte(reserva.subtotalCentavos)}</dd>
-              <dt>Impuestos</dt>
-              <dd>{mostrarImporte(reserva.impuestosCentavos)}</dd>
-              <dt>Cargos</dt>
-              <dd>{mostrarImporte(reserva.cargosCentavos)}</dd>
-              <dt>Condiciones comerciales</dt>
-              <dd>{reserva.condiciones || "—"}</dd>
-              <dt>Observaciones de la cotización</dt>
-              <dd>{reserva.observaciones || "—"}</dd>
+            <dl className="ficha-datos">
+              <div>
+                <dt>Subtotal</dt>
+                <dd>{mostrarImporte(reserva.subtotalCentavos)}</dd>
+              </div>
+              <div>
+                <dt>Impuestos</dt>
+                <dd>{mostrarImporte(reserva.impuestosCentavos)}</dd>
+              </div>
+              <div>
+                <dt>Cargos</dt>
+                <dd>{mostrarImporte(reserva.cargosCentavos)}</dd>
+              </div>
+              <div className="reserva-importe">
+                <dt>Total (MXN)</dt>
+                <dd>{mostrarImporte(reserva.totalCentavos)}</dd>
+              </div>
             </dl>
-          </>
-        )}
-      </section>
-      {reserva && (
-        <PagosInformativos
-          reserva={reserva}
-          disabled={busy}
-          onBusyChange={setPaymentBusy}
-          onSaved={(summary) => setUpdated({ ...reserva, ...summary })}
-        />
+          </section>
+
+          <PagosInformativos
+            reserva={reserva}
+            disabled={busy}
+            onBusyChange={setPaymentBusy}
+            onSaved={(summary) => setUpdated({ ...reserva, ...summary })}
+          />
+
+          <section
+            className="panel reserva-notas"
+            aria-label="Condiciones y observaciones"
+          >
+            <div>
+              <h3>Condiciones comerciales</h3>
+              <p>{reserva.condiciones || "Sin condiciones registradas."}</p>
+            </div>
+            <div>
+              <h3>Observaciones de la cotización</h3>
+              <p>{reserva.observaciones || "Sin observaciones registradas."}</p>
+            </div>
+          </section>
+        </>
       )}
     </>
   );

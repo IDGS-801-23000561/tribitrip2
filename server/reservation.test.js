@@ -317,13 +317,9 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal((await state("Confirmada", 0, "ajeno")).status, 404);
   assert.equal((await state("Otra", 0)).status, 400);
   assert.equal((await state("Completada", 0)).status, 409);
-  assert.equal(
-    (await state("Confirmada", 0, "admin")).body.estado,
-    "Confirmada",
-  );
   assert.equal((await state("En viaje", 0)).status, 409);
   const locator = await call(path + "/estado", "propio", "PATCH", {
-    revision: 1,
+    revision: 0,
     localizador: "NUEVO",
     proveedorReferencia: "Proveedor manual",
   });
@@ -348,6 +344,7 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal(same[0].body.pagos.length, 1);
   assert.equal(same[0].body.pagadoCentavos, 3000);
   assert.equal(same[0].body.saldoCentavos, 8300);
+  assert.equal(same[0].body.estado, "Pendiente de pago");
   assert.equal(same[0].body.pagos[0].registradoPor, String(users.propio._id));
   assert.equal((await pay({ ...payment, monto: "1.00" })).status, 409);
   assert.equal(
@@ -375,6 +372,12 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal(balance.saldoCentavos, 0);
   assert.equal(balance.pagos.length, 3);
   assert.equal(balance.excedenteCentavos, 1700);
+  assert.equal(balance.estado, "Confirmada");
+  assert.deepEqual(balance.transiciones, ["En viaje", "Cancelada"]);
+  const confirmed = (await call(path, "propio")).body;
+  assert.equal(confirmed.estado, "Confirmada");
+  assert.equal(confirmed.estadoActualizadoPor, String(users.propio._id));
+  assert.equal((await state("En viaje", locator.body.revision)).status, 409);
   const travelling = (await state("En viaje", balance.revision)).body;
   assert.equal(travelling.estado, "En viaje");
   assert.equal((await state("Cancelada", travelling.revision)).status, 409);
@@ -389,8 +392,52 @@ test("API protege reservas y pagos y conserva el saldo ante reintentos y concurr
   assert.equal(extra.status, 201);
   assert.equal(extra.body.saldoCentavos, 0);
   assert.equal(extra.body.excedenteCentavos, 5000);
+  assert.equal(extra.body.estado, "Completada");
+  const refunds = path + "/devoluciones";
+  const refund = { ...todayPayment(), monto: "50.00", referencia: "DEV-01" };
+  const refundCall = (body, session = "propio") =>
+    call(refunds, session, "POST", body);
+  assert.equal((await refundCall(refund, "ajeno")).status, 404);
+  assert.equal((await refundCall({ ...refund, monto: "50.01" })).status, 409);
+  const duplicate = { ...refund, clave: randomUUID(), referencia: "DEV-02" };
+  const results = await Promise.all([
+    refundCall(refund),
+    refundCall(duplicate),
+  ]);
+  assert.deepEqual(results.map(({ status }) => status).sort(), [201, 409]);
+  const winner = results[0].status === 201 ? refund : duplicate;
+  const retry = await refundCall(winner);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.excedenteCentavos, 0);
+  assert.equal(retry.body.saldoCentavos, 0);
+  assert.equal(retry.body.pagadoCentavos, 11300);
+  assert.equal(
+    retry.body.pagos.filter(({ tipo }) => tipo === "Devolución").length,
+    1,
+  );
+  assert.equal(
+    retry.body.pagos.find(({ tipo }) => tipo === "Devolución").montoCentavos,
+    5000,
+  );
+  const afterRefund = (await call(path, "propio")).body;
+  assert.equal(afterRefund.excedenteCentavos, 0);
+
   const otherPath = "/reservas/" + other.body.id;
-  assert.equal((await state("Cancelada", 0, "admin", otherPath)).status, 200);
+  const exact = await pay(
+    {
+      ...todayPayment(),
+      monto: (other.body.totalCentavos / 100).toFixed(2),
+    },
+    "admin",
+    otherPath + "/pagos",
+  );
+  assert.equal(exact.status, 201);
+  assert.equal(exact.body.estado, "Confirmada");
+  assert.equal(exact.body.excedenteCentavos, 0);
+  assert.equal(
+    (await state("Cancelada", exact.body.revision, "admin", otherPath)).status,
+    200,
+  );
   assert.equal(
     (await pay(todayPayment(), "admin", otherPath + "/pagos")).status,
     409,

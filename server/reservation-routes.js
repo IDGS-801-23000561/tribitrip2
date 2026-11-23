@@ -33,6 +33,10 @@ function paymentSummary(reserva) {
     pagadoCentavos,
     ...saldos(totalCentavos, pagadoCentavos),
     pagos,
+    estado: reserva.estado,
+    estadoActualizadoEn: reserva.estadoActualizadoEn,
+    estadoActualizadoPor: reserva.estadoActualizadoPor,
+    transiciones: transicionesReserva[reserva.estado],
   };
 }
 
@@ -312,7 +316,8 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
     res.json(paymentSummary((await findReserva(req)).toObject()));
   });
 
-  app.post(path + "/:id/pagos", validId, async (req, res) => {
+  async function saveMovement(req, res, tipo) {
+    const refund = tipo === "Devolución";
     let reserva = await findReserva(req);
     const {
       fecha,
@@ -324,13 +329,14 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
     } = req.body || {};
     const montoCentavos = aCentavos(monto);
     if (!isCalendarDate(fecha) || fecha > fechaCiudadMexico())
-      throw fail(400, "Introduce una fecha de pago válida y no futura.");
+      throw fail(400, "Introduce una fecha válida y no futura.");
     if (!(montoCentavos > 0) || !clavePagoValida(clave))
       throw fail(
         400,
         "Introduce un monto positivo con hasta dos decimales y una clave válida.",
       );
     const payment = {
+      tipo,
       fecha,
       montoCentavos,
       clave: clave.toLowerCase(),
@@ -346,31 +352,57 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
         ({ clave }) => clave === payment.clave,
       );
       if (previous) {
-        const same = [
-          "fecha",
-          "montoCentavos",
-          "metodo",
-          "referencia",
-          "observaciones",
-        ].every((field) => previous[field] === payment[field]);
+        const same =
+          (previous.tipo ?? "Pago") === tipo &&
+          [
+            "fecha",
+            "montoCentavos",
+            "metodo",
+            "referencia",
+            "observaciones",
+          ].every((field) => previous[field] === payment[field]);
         if (!same)
-          throw fail(409, "La clave ya se usó con datos de pago diferentes.");
+          throw fail(409, "La clave ya se usó con datos de otro movimiento.");
         return res.json(paymentSummary(reserva.toObject()));
       }
-      if (reserva.estado === "Cancelada")
-        throw fail(409, "La reserva está cancelada.");
+      if (refund) {
+        const { excedenteCentavos } = saldos(
+          reserva.totalCentavos,
+          reserva.pagadoCentavos,
+        );
+        if (montoCentavos !== excedenteCentavos)
+          throw fail(
+            409,
+            "El excedente cambió. Recarga la reserva para consultar el importe disponible.",
+          );
+      } else {
+        if (reserva.estado === "Cancelada")
+          throw fail(409, "La reserva está cancelada.");
+        if (reserva.pagadoCentavos + montoCentavos > maxCentavos)
+          throw fail(
+            409,
+            "El total registrado supera el límite de importes del sistema.",
+          );
+      }
       if (
         reserva.pagos.some(
           (item) => JSON.stringify(referenciaPago(item)) === reference,
         )
       )
-        throw fail(409, "Ya se registró esa referencia para el mismo método.");
-      if (reserva.pagadoCentavos + montoCentavos > maxCentavos)
         throw fail(
           409,
-          "El total registrado supera el límite de importes del sistema.",
+          "Ya se registró esa referencia para el mismo método y tipo de movimiento.",
         );
       reserva.pagos.push(payment);
+      if (
+        !refund &&
+        reserva.estado === "Pendiente de pago" &&
+        reserva.pagadoCentavos + montoCentavos >= reserva.totalCentavos
+      ) {
+        reserva.estado = "Confirmada";
+        reserva.estadoActualizadoPor = req.usuario._id;
+        reserva.estadoActualizadoEn = new Date();
+      }
       try {
         await saveReserva(reserva);
         return res.status(201).json(paymentSummary(reserva.toObject()));
@@ -380,5 +412,12 @@ export function registerReservationRoutes(app, { scope, fail, validId }) {
       }
     }
     throw fail(409, conflict);
-  });
+  }
+
+  app.post(path + "/:id/pagos", validId, (req, res) =>
+    saveMovement(req, res, "Pago"),
+  );
+  app.post(path + "/:id/devoluciones", validId, (req, res) =>
+    saveMovement(req, res, "Devolución"),
+  );
 }

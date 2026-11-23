@@ -56,7 +56,7 @@ export function Pagination({ list }) {
   const { pagina, total, limite } = data;
   const pages = Math.max(1, Math.ceil(total / limite));
   return (
-    <nav className="formulario-acciones" aria-label="Paginación">
+    <nav className="formulario-acciones paginacion" aria-label="Paginación">
       <button
         className="btn-secondary"
         type="button"

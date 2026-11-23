@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import {
   aCentavos,
@@ -38,6 +39,7 @@ export default function CotizacionForm({
   oportunidades = [],
   oportunidadInicial,
   servicioInicial,
+  aviso,
   onSave,
   onCancel,
 }) {
@@ -124,7 +126,12 @@ export default function CotizacionForm({
   }
 
   return (
-    <>
+    <FormDialog
+      title={cotizacion ? "Nueva versión de la cotización" : "Nueva cotización"}
+      onClose={onCancel}
+      busy={busy}
+    >
+      {aviso && <p role={cotizacion ? undefined : "alert"}>{aviso}</p>}
       <form className="account-form formulario-grid" onSubmit={submit}>
         {!cotizacion && (
           <>
@@ -339,6 +346,6 @@ export default function CotizacionForm({
           disabled={busy || lineas.length >= maxConceptos}
         />
       )}
-    </>
+    </FormDialog>
   );
 }

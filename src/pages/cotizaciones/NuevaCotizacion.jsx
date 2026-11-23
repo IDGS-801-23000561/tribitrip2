@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { api } from "../../services/api";
 import { useApiData } from "../../services/useApiData";
@@ -15,13 +16,42 @@ export default function NuevaCotizacion() {
   const opciones = oportunidades?.filter((item) => item.cliente);
   const oportunidadInicial = opciones?.find(({ id }) => id === opportunityId);
 
+  function close() {
+    const filters = new URLSearchParams(params);
+    filters.delete("servicio");
+    navigate(
+      { pathname: "/cotizaciones", search: filters.toString() },
+      { replace: true },
+    );
+  }
+
+  if (opciones?.length > 0 && (!serviceId || servicio)) {
+    return (
+      <CotizacionForm
+        key={params.toString()}
+        oportunidades={opciones}
+        servicioInicial={servicio}
+        oportunidadInicial={oportunidadInicial}
+        aviso={
+          opportunityId && !oportunidadInicial
+            ? "La oportunidad seleccionada no está disponible."
+            : ""
+        }
+        onCancel={close}
+        onSave={async (body) => {
+          const saved = await api("/cotizaciones", { method: "POST", body });
+          navigate("/cotizaciones/" + saved.id, {
+            replace: true,
+            state: { creada: true },
+          });
+        }}
+      />
+    );
+  }
+
   return (
-    <section className="panel">
-      <h2>Nueva cotización</h2>
+    <FormDialog title="Nueva cotización" onClose={close}>
       {(error || errorServicio) && <p role="alert">{error || errorServicio}</p>}
-      {opciones && opportunityId && !oportunidadInicial && (
-        <p role="alert">La oportunidad seleccionada no está disponible.</p>
-      )}
       {(!opciones || (serviceId && !servicio)) && !error && !errorServicio && (
         <p role="status">Cargando datos…</p>
       )}
@@ -31,25 +61,6 @@ export default function NuevaCotizacion() {
           para continuar.
         </p>
       )}
-      <Link className="btn-secondary" to="/cotizaciones">
-        Volver a cotizaciones
-      </Link>
-      {opciones?.length > 0 && (!serviceId || servicio) && (
-        <CotizacionForm
-          key={params.toString()}
-          oportunidades={opciones}
-          servicioInicial={servicio}
-          oportunidadInicial={oportunidadInicial}
-          onCancel={() => navigate("/cotizaciones")}
-          onSave={async (body) => {
-            const saved = await api("/cotizaciones", { method: "POST", body });
-            navigate("/cotizaciones/" + saved.id, {
-              replace: true,
-              state: { creada: true },
-            });
-          }}
-        />
-      )}
-    </section>
+    </FormDialog>
   );
 }

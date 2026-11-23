@@ -1,7 +1,9 @@
 import { connect } from "./models.js";
 import { app } from "./app.js";
+import { confirmarReservasPagadas } from "./reservation-model.js";
 try {
   await connect();
+  await confirmarReservasPagadas();
   app.listen(Number(process.env.PORT || 3001), "127.0.0.1", () =>
     console.log(
       "API TribiTrip disponible en http://127.0.0.1:" +

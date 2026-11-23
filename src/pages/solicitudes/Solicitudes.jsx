@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api } from "../../services/api";
@@ -7,6 +8,7 @@ export default function Solicitudes() {
   const navigate = useNavigate();
   const [solicitudes, setSolicitudes] = useState(null);
   const [clientes, setClientes] = useState(null);
+  const [formBusy, setFormBusy] = useState(false);
   const [creando, setCreando] = useState(false);
   const [error, setError] = useState("");
   const [errorClientes, setErrorClientes] = useState("");
@@ -38,14 +40,15 @@ export default function Solicitudes() {
   return (
     <section className="panel">
       <h2>Solicitudes registradas</h2>
-      {!creando && (
-        <button className="btn-primary" onClick={nuevaSolicitud}>
-          Nueva solicitud
-        </button>
-      )}
+      <button className="btn-primary" onClick={nuevaSolicitud}>
+        Nueva solicitud
+      </button>
       {creando && (
-        <>
-          <h3>Nueva solicitud</h3>
+        <FormDialog
+          title="Nueva solicitud"
+          onClose={() => setCreando(false)}
+          busy={formBusy}
+        >
           {errorClientes && <p role="alert">{errorClientes}</p>}
           {!clientes && !errorClientes && (
             <p role="status">Cargando contactos…</p>
@@ -58,6 +61,7 @@ export default function Solicitudes() {
           )}
           {clientes?.length > 0 ? (
             <SolicitudForm
+              onBusyChange={setFormBusy}
               clientes={clientes}
               onCancel={() => setCreando(false)}
               onSave={async (body) => {
@@ -73,7 +77,7 @@ export default function Solicitudes() {
               Cerrar
             </button>
           )}
-        </>
+        </FormDialog>
       )}
       {error && <p role="alert">{error}</p>}
       {!solicitudes && !error && <p role="status">Cargando solicitudes…</p>}

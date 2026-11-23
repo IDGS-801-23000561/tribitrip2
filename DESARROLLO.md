@@ -39,7 +39,7 @@ Para verificar la integración con MongoDB en un entorno autorizado, comprueba e
 
 ## Catálogo y cotizaciones
 
-En **Cotizaciones**, abre el **Catálogo de servicios** para buscar por nombre o destino, filtrar por destino y seleccionar un servicio. El catálogo consulta documentos de MongoDB mediante los endpoints de lectura. Para ver resultados, el entorno autorizado debe contar con registros válidos en la colección del modelo `ServicioTuristico`. Cada registro necesita nombre, descripción y precio en centavos. El tipo puede ser Servicio o Paquete y el destino, la categoría y el proveedor son opcionales.
+En **Cotizaciones → Catálogo de servicios**, pulsa **Nuevo servicio** para registrar un servicio o paquete en el catálogo compartido. Captura nombre, descripción y precio de referencia en MXN. Destino, categoría y proveedor son opcionales. Usa la búsqueda para consultar servicios por nombre o destino y seleccionarlos al cotizar.
 
 Para cotizar, selecciona un cliente y una oportunidad accesible. Agrega líneas manuales o del catálogo, ajusta cantidades, descripciones y precios, y registra vigencia, condiciones y observaciones. También puedes abrir el listado de cotizaciones desde el detalle de una oportunidad. El formulario admite impuestos y cargos como importes fijos opcionales. Trabaja en MXN y usa hasta dos decimales. La API calcula y guarda los importes en centavos y asigna un folio basado en el ObjectId completo.
 

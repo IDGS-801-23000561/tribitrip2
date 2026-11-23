@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api } from "../../services/api";
@@ -41,58 +42,62 @@ function NuevaOportunidad({ onCancel }) {
   }
 
   return (
-    <form className="account-form formulario-grid" onSubmit={submit}>
-      <h3>Nueva oportunidad</h3>
-      {loadError && <p role="alert">{loadError}</p>}
-      {!solicitudes && !loadError && <p role="status">Cargando solicitudes…</p>}
-      {solicitudes?.length === 0 && (
-        <p>
-          Registra una <Link to="/solicitudes">solicitud de viaje</Link> para
-          continuar.
-        </p>
-      )}
-      {solicitudes?.length > 0 && (
-        <>
-          <label>
-            Título
-            <input name="titulo" required maxLength={120} />
-          </label>
-          <label>
-            Solicitud de viaje
-            <select name="solicitud" required defaultValue="">
-              <option value="" disabled>
-                Selecciona una solicitud
-              </option>
-              {solicitudes.map((solicitud) => (
-                <option key={solicitud.id} value={solicitud.id}>
-                  {solicitud.cliente.nombre} · {solicitud.destino} ·{" "}
-                  {solicitud.salida}
-                </option>
-              ))}
-            </select>
-          </label>
-          <p>
-            El propietario del contacto será el responsable de la oportunidad.
-          </p>
-        </>
-      )}
-      {error && <p role="alert">{error}</p>}
-      <div className="formulario-acciones">
-        <button
-          type="button"
-          className="btn-secondary"
-          disabled={busy}
-          onClick={onCancel}
-        >
-          Cancelar
-        </button>
-        {solicitudes?.length > 0 && (
-          <button className="btn-primary" disabled={busy}>
-            {busy ? "Guardando…" : "Guardar oportunidad"}
-          </button>
+    <FormDialog title="Nueva oportunidad" onClose={onCancel} busy={busy}>
+      <form className="account-form formulario-grid" onSubmit={submit}>
+        <h3>Nueva oportunidad</h3>
+        {loadError && <p role="alert">{loadError}</p>}
+        {!solicitudes && !loadError && (
+          <p role="status">Cargando solicitudes…</p>
         )}
-      </div>
-    </form>
+        {solicitudes?.length === 0 && (
+          <p>
+            Registra una <Link to="/solicitudes">solicitud de viaje</Link> para
+            continuar.
+          </p>
+        )}
+        {solicitudes?.length > 0 && (
+          <>
+            <label>
+              Título
+              <input name="titulo" required maxLength={120} />
+            </label>
+            <label>
+              Solicitud de viaje
+              <select name="solicitud" required defaultValue="">
+                <option value="" disabled>
+                  Selecciona una solicitud
+                </option>
+                {solicitudes.map((solicitud) => (
+                  <option key={solicitud.id} value={solicitud.id}>
+                    {solicitud.cliente.nombre} · {solicitud.destino} ·{" "}
+                    {solicitud.salida}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p>
+              El propietario del contacto será el responsable de la oportunidad.
+            </p>
+          </>
+        )}
+        {error && <p role="alert">{error}</p>}
+        <div className="formulario-acciones">
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={busy}
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+          {solicitudes?.length > 0 && (
+            <button className="btn-primary" disabled={busy}>
+              {busy ? "Guardando…" : "Guardar oportunidad"}
+            </button>
+          )}
+        </div>
+      </form>
+    </FormDialog>
   );
 }
 
@@ -133,13 +138,10 @@ export default function Oportunidades() {
   return (
     <section className="panel">
       <h2>Oportunidades registradas</h2>
-      {creando ? (
-        <NuevaOportunidad onCancel={() => setCreando(false)} />
-      ) : (
-        <button className="btn-primary" onClick={() => setCreando(true)}>
-          Nueva oportunidad
-        </button>
-      )}
+      <button className="btn-primary" onClick={() => setCreando(true)}>
+        Nueva oportunidad
+      </button>
+      {creando && <NuevaOportunidad onCancel={() => setCreando(false)} />}
       <ListFilters list={list} selects={selects} />
       {usersError && <p role="alert">{usersError}</p>}
       {error && <p role="alert">{error}</p>}

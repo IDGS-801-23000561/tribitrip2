@@ -1,3 +1,4 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import { api } from "../../services/api";
 
@@ -8,6 +9,17 @@ export default function Viajeros({ solicitud, onSaved, onEditCapacity }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const { viajeros, cantidadViajeros } = solicitud;
+
+  function openNewTraveler() {
+    openForm(
+      viajeros.length === 0
+        ? {
+            nombre: solicitud.cliente.nombre,
+            parentesco: "Titular de la solicitud",
+          }
+        : {},
+    );
+  }
 
   function openForm(viajero) {
     setError("");
@@ -35,30 +47,26 @@ export default function Viajeros({ solicitud, onSaved, onEditCapacity }) {
   }
 
   return (
-    <section className="panel">
-      <h2>Viajeros y acompañantes</h2>
-      <p>
-        {viajeros.length} de {cantidadViajeros} registrados
-      </p>
-      <ul>
-        {tipos.map((tipo) => (
-          <li key={tipo}>
-            {tipo}: {viajeros.filter((viajero) => viajero.tipo === tipo).length}
-          </li>
-        ))}
-      </ul>
-      {!form && viajeros.length < cantidadViajeros && (
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => openForm({})}
-        >
-          Registrar viajero
-        </button>
-      )}
-      {!form && viajeros.length >= cantidadViajeros && (
-        <>
-          <p>Se alcanzó el cupo de la solicitud.</p>
+    <section
+      className="panel ficha-panel solicitud-viajeros"
+      aria-labelledby="solicitud-viajeros"
+    >
+      <header className="ficha-encabezado">
+        <div>
+          <h2 id="solicitud-viajeros">Viajeros y acompañantes</h2>
+          <p>
+            {viajeros.length} de {cantidadViajeros} registrados
+          </p>
+        </div>
+        {viajeros.length < cantidadViajeros ? (
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={openNewTraveler}
+          >
+            Registrar viajero
+          </button>
+        ) : (
           <button
             type="button"
             className="btn-secondary"
@@ -66,7 +74,22 @@ export default function Viajeros({ solicitud, onSaved, onEditCapacity }) {
           >
             Aumentar cupo
           </button>
-        </>
+        )}
+      </header>
+      <dl className="ficha-datos solicitud-tipos">
+        {tipos.map((tipo) => (
+          <div key={tipo}>
+            <dt>{tipo}</dt>
+            <dd>
+              {viajeros.filter((viajero) => viajero.tipo === tipo).length}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {viajeros.length === 0 && (
+        <p className="solicitud-viajeros-vacio">
+          Aún no hay viajeros registrados.
+        </p>
       )}
       {viajeros.length > 0 && (
         <div className="tabla-contenedor">
@@ -104,62 +127,67 @@ export default function Viajeros({ solicitud, onSaved, onEditCapacity }) {
         </div>
       )}
       {form && (
-        <form
-          key={form.id || "nuevo"}
-          className="account-form formulario-grid"
-          onSubmit={submit}
+        <FormDialog
+          title={form.id ? "Editar viajero" : "Registrar viajero"}
+          onClose={() => setForm(null)}
+          busy={busy}
         >
-          <h3>{form.id ? "Editar viajero" : "Registrar viajero"}</h3>
-          <label>
-            Nombre
-            <input
-              name="nombre"
-              required
-              maxLength={120}
-              defaultValue={form.nombre}
-            />
-          </label>
-          <label>
-            Relación con el cliente principal
-            <input
-              name="parentesco"
-              required
-              maxLength={100}
-              defaultValue={form.parentesco}
-            />
-          </label>
-          <label>
-            Tipo
-            <select name="tipo" defaultValue={form.tipo ?? "Adulto"}>
-              {tipos.map((tipo) => (
-                <option key={tipo}>{tipo}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Fecha de nacimiento (opcional)
-            <input
-              name="nacimiento"
-              type="date"
-              max={new Date().toISOString().slice(0, 10)}
-              defaultValue={form.nacimiento ?? ""}
-            />
-          </label>
-          {error && <p role="alert">{error}</p>}
-          <div className="formulario-acciones">
-            <button
-              type="button"
-              className="btn-secondary"
-              disabled={busy}
-              onClick={() => setForm(null)}
-            >
-              Cancelar
-            </button>
-            <button className="btn-primary" disabled={busy}>
-              {busy ? "Guardando…" : "Guardar viajero"}
-            </button>
-          </div>
-        </form>
+          <form
+            key={form.id || "nuevo"}
+            className="account-form formulario-grid"
+            onSubmit={submit}
+          >
+            <label>
+              Nombre
+              <input
+                name="nombre"
+                required
+                maxLength={120}
+                defaultValue={form.nombre}
+              />
+            </label>
+            <label>
+              Relación con el cliente principal
+              <input
+                name="parentesco"
+                required
+                maxLength={100}
+                defaultValue={form.parentesco}
+              />
+            </label>
+            <label>
+              Tipo
+              <select name="tipo" defaultValue={form.tipo ?? "Adulto"}>
+                {tipos.map((tipo) => (
+                  <option key={tipo}>{tipo}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Fecha de nacimiento (opcional)
+              <input
+                name="nacimiento"
+                type="date"
+                max={new Date().toISOString().slice(0, 10)}
+                defaultValue={form.nacimiento ?? ""}
+              />
+            </label>
+            {error && <p role="alert">{error}</p>}
+            <div className="formulario-acciones">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={busy}
+                onClick={() => setForm(null)}
+              >
+                Cancelar
+              </button>
+              <button className="btn-primary" disabled={busy}>
+                {busy ? "Guardando…" : "Guardar viajero"}
+              </button>
+            </div>
+          </form>
+        </FormDialog>
       )}
     </section>
   );

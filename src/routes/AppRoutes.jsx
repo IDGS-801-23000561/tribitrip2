@@ -51,13 +51,18 @@ export default function AppRoutes() {
           <Route path="solicitudes/:id" element={<SolicitudDetalle />} />
           <Route path="oportunidades" element={<Oportunidades />} />
           <Route path="oportunidades/:id" element={<OportunidadDetalle />} />
-          <Route path="cotizaciones" element={<Cotizaciones />} />
+          <Route path="cotizaciones" element={<Cotizaciones />}>
+            <Route path="nueva" element={<NuevaCotizacion />} />
+          </Route>
           <Route path="cotizaciones/catalogo" element={<Catalogo />} />
-          <Route path="cotizaciones/nueva" element={<NuevaCotizacion />} />
           <Route path="cotizaciones/:id" element={<CotizacionDetalle />} />
-          <Route path="cotizaciones/:id/versiones/:version/documento" element={<CotizacionDocumento />} />
-          <Route path="reservas" element={<Reservas />} />
-          <Route path="reservas/nueva" element={<NuevaReserva />} />
+          <Route
+            path="cotizaciones/:id/versiones/:version/documento"
+            element={<CotizacionDocumento />}
+          />
+          <Route path="reservas" element={<Reservas />}>
+            <Route path="nueva" element={<NuevaReserva />} />
+          </Route>
           <Route path="reservas/:id" element={<ReservaDetalle />} />
         </Route>
       </Route>

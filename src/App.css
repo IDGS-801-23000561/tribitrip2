@@ -368,3 +368,99 @@
     grid-template-columns: 1fr;
   }
 }
+
+.header-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.main-header {
+  background: linear-gradient(110deg, #edf5ff, #fff 75%);
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.main-content > .panel,
+.clientes-panel {
+  box-shadow: 0 4px 14px #1e293b08;
+}
+
+.panel > h2:first-child {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.panel > .tabla-contenedor {
+  margin-top: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.tabla-clientes tbody tr:hover {
+  background: #f4f8ff;
+}
+
+.form-dialog {
+  width: min(760px, calc(100% - 24px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #dce6ef;
+  border-radius: 16px;
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 24px 72px #111c354d;
+}
+
+.form-dialog::backdrop {
+  background: #111c358c;
+}
+
+.form-dialog-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f5f8fc;
+}
+
+.form-dialog-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.form-dialog-body {
+  padding: 20px 22px;
+}
+
+.form-dialog-body > .account-form {
+  margin-block: 0;
+}
+
+@media (max-width: 700px) {
+  .main-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .main-content > .panel {
+    padding: 16px;
+  }
+
+  .form-dialog-header,
+  .form-dialog-body {
+    padding-inline: 16px;
+  }
+}

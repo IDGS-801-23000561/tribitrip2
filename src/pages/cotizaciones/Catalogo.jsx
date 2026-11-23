@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useApiData } from "../../services/useApiData";
+import ServicioForm from "./ServicioForm";
 import { mostrarImporte } from "./importes";
 
 function ServicioDetalle({ id }) {
@@ -26,7 +27,21 @@ function ServicioDetalle({ id }) {
 export default function Catalogo({ onSelect, disabled = false }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
-  const { data, error } = useApiData("/servicios-turisticos?" + query);
+  const [creating, setCreating] = useState(false);
+  const [revision, setRevision] = useState(0);
+  const [notice, setNotice] = useState("");
+  const { data, error } = useApiData(
+    "/servicios-turisticos?" + query,
+    revision,
+  );
+
+  function addService(servicio) {
+    setCreating(false);
+    setQuery("");
+    setSelected(servicio.id);
+    setRevision((value) => value + 1);
+    setNotice(servicio.nombre + " se guardó en el catálogo.");
+  }
 
   function search(event) {
     event.preventDefault();
@@ -43,7 +58,27 @@ export default function Catalogo({ onSelect, disabled = false }) {
         </Link>
       )}
       <h2>Catálogo de servicios turísticos</h2>
-      <form className="account-form formulario-grid" onSubmit={search}>
+      {!onSelect && (
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={() => {
+            setNotice("");
+            setCreating(true);
+          }}
+        >
+          Nuevo servicio
+        </button>
+      )}
+      {creating && (
+        <ServicioForm onClose={() => setCreating(false)} onSaved={addService} />
+      )}
+      {notice && <p role="status">{notice}</p>}
+      <form
+        key={revision}
+        className="account-form formulario-grid"
+        onSubmit={search}
+      >
         <label>
           Nombre o destino
           <input name="q" type="search" maxLength={120} />

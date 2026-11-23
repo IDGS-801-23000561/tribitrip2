@@ -1,9 +1,10 @@
+import FormDialog from "../../components/FormDialog";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { api } from "../../services/api";
 import { useApiData } from "../../services/useApiData";
 
-function Registro({ cotizacionInicial }) {
+function Registro({ cotizacionInicial, onClose }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(cotizacionInicial ?? "");
   const [busy, setBusy] = useState(false);
@@ -39,11 +40,7 @@ function Registro({ cotizacionInicial }) {
   }
 
   return (
-    <section className="panel">
-      <h2>Nueva reserva interna</h2>
-      <Link className="btn-secondary" to="/reservas">
-        Volver a reservas
-      </Link>
+    <FormDialog title="Nueva reserva interna" onClose={onClose} busy={busy}>
       {!accepted && !loadError && <p role="status">Cargando cotizaciones…</p>}
       {loadError && <p role="alert">{loadError}</p>}
       {accepted?.length === 0 && (
@@ -118,12 +115,29 @@ function Registro({ cotizacionInicial }) {
           {error && <p role="alert">{error}</p>}
         </form>
       )}
-    </section>
+    </FormDialog>
   );
 }
 
 export default function NuevaReserva() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const cotizacion = params.get("cotizacion");
-  return <Registro key={cotizacion ?? ""} cotizacionInicial={cotizacion} />;
+
+  function close() {
+    const filters = new URLSearchParams(params);
+    filters.delete("cotizacion");
+    navigate(
+      { pathname: "/reservas", search: filters.toString() },
+      { replace: true },
+    );
+  }
+
+  return (
+    <Registro
+      key={cotizacion ?? ""}
+      cotizacionInicial={cotizacion}
+      onClose={close}
+    />
+  );
 }

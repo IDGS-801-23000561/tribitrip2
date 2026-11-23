@@ -40,12 +40,18 @@ export const clavePagoValida = (value) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
-export const referenciaPago = ({ metodo, referencia }) =>
-  [metodo, referencia].map((value) =>
+export const referenciaPago = ({ tipo = "Pago", metodo, referencia }) =>
+  [tipo, metodo, referencia].map((value) =>
     String(value).trim().replace(/\s+/g, " ").toLowerCase(),
   );
 
 export const pagoInformativoSchema = new Schema({
+  tipo: {
+    type: String,
+    enum: ["Pago", "Devolución"],
+    default: "Pago",
+    required: true,
+  },
   clave: {
     type: String,
     required: true,
@@ -158,7 +164,16 @@ reservaSchema.pre("validate", function () {
       this.invalidate("pagos", "Hay pagos duplicados.");
     claves.add(pago.clave);
     referencias.add(referencia);
-    pagado += pago.montoCentavos;
+    if (pago.tipo === "Devolución") {
+      if (pago.montoCentavos > pagado - this.totalCentavos)
+        this.invalidate(
+          "pagos",
+          "La devolución supera el excedente disponible.",
+        );
+      pagado -= pago.montoCentavos;
+    } else {
+      pagado += pago.montoCentavos;
+    }
   }
   this.pagadoCentavos = pagado;
 });
@@ -167,3 +182,30 @@ reservaSchema.index({ asesor: 1, estado: 1, createdAt: -1 });
 reservaSchema.index({ estado: 1, createdAt: -1 });
 reservaSchema.index({ cliente: 1, createdAt: -1 });
 export const Reserva = mongoose.model("Reserva", reservaSchema);
+
+// Apply the confirmation rule to reservations paid before it was introduced.
+export async function confirmarReservasPagadas() {
+  await Reserva.updateMany(
+    {
+      estado: "Pendiente de pago",
+      "pagos.0": { $exists: true },
+      $expr: { $gte: ["$pagadoCentavos", "$totalCentavos"] },
+    },
+    [
+      {
+        $set: {
+          estado: "Confirmada",
+          estadoActualizadoEn: "$$NOW",
+          estadoActualizadoPor: {
+            $ifNull: [
+              { $arrayElemAt: ["$pagos.registradoPor", -1] },
+              "$registradaPor",
+            ],
+          },
+          revision: { $add: [{ $ifNull: ["$revision", 0] }, 1] },
+        },
+      },
+    ],
+    { updatePipeline: true },
+  );
+}

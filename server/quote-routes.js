@@ -284,6 +284,26 @@ export function registerQuoteRoutes(app, { scope, fail, validId }) {
     );
   });
 
+  app.post("/api/servicios-turisticos", async (req, res) => {
+    const body = req.body ?? {};
+    const tipo =
+      enumFilter(body.tipo, ["Servicio", "Paquete"], "Tipo de servicio") ??
+      "Servicio";
+    const servicio = await ServicioTuristico.create({
+      nombre: text(body.nombre, "nombre", 150, true),
+      descripcion: text(body.descripcion, "descripción", 400, true),
+      tipo,
+      categoria: text(body.categoria ?? "", "categoría", 100),
+      destino: text(body.destino ?? "", "destino", 120),
+      proveedor: text(body.proveedor ?? "", "proveedor", 150),
+      precioReferenciaCentavos: amount(
+        body.precioReferencia,
+        "precio de referencia",
+      ),
+    });
+    res.status(201).json(asJson(servicio.toObject()));
+  });
+
   app.get("/api/servicios-turisticos/:id", validId, async (req, res) => {
     const servicio = await ServicioTuristico.findById(req.params.id).lean();
     if (!servicio) throw fail(404, "Servicio turístico no encontrado.");
